@@ -44,6 +44,8 @@ import com.atlassian.confluence.remote.ConfluenceSoapHelper;
 import com.atlassian.confluence.remote.IConfluenceSoapService;
 import com.atlassian.confluence.remote.NotPermittedException;
 import com.atlassian.confluence.remote.RemoteAttachment;
+import com.atlassian.confluence.remote.RemoteBlogEntry;
+import com.atlassian.confluence.remote.RemoteBlogEntrySummary;
 import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePage;
 import com.atlassian.confluence.remote.RemotePageHistory;
@@ -97,23 +99,22 @@ public class ConfluenceService {
         return user;
     }
 
-    public static ConfluenceService getService(String server, String user,
-            String password) throws LoginFailureException {
+    public static ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
 
         ConcreteService instance = new ConcreteService();
         instance.password = password;
         instance.user = user;
         instance.server = server.endsWith(".wsdl") ? server : server
                 + CONFLUENCE_SOAP_EP;
-        instance.connectAndLogin();
+        instance.connectAndLogin(useProxy);
         return instance;
     }
 
-    protected void connectAndLogin() throws LoginFailureException {
+    protected void connectAndLogin(boolean useProxy) throws LoginFailureException {
         if (service == null) {
             TimTamPlugin plugin = TimTamPlugin.getInstance();
             ProxyContext context = new ProxyContext();
-            if (plugin.shouldUseProxy()) {
+            if (useProxy) {
                 context.setProxyHost(plugin.getProxyHost());
                 context.setProxyPort(plugin.getProxyPort());
                 context.setProxyUser(plugin.getProxyUser());
@@ -125,15 +126,14 @@ public class ConfluenceService {
             }
 
             try {
-                //TODO loos the below hack by getting atlassian to sort it out
                 Mappings.readMappings("ConfluenceSoap.map");
                 service = (IConfluenceSoapService) Registry.bind(server,
                         IConfluenceSoapService.class, context);
                 ConfluenceSoapHelper.bind(server);
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 String message = "failed to bind to : " + server;
-                plugin.logException(message, e, true);
-                throw new LoginFailureException(message, e);
+                plugin.logException(message, t, true);
+                throw new LoginFailureException(message, t);
             }
 
             try {
@@ -199,9 +199,16 @@ public class ConfluenceService {
         return service.getPermissions(getToken(), spaceId);
     }
 
-    public RemoteAttachment[] getAttachments(long pageId)
-            throws RemoteException {
+    public RemoteAttachment[] getAttachments(long pageId) throws RemoteException {
         return service.getAttachments(getToken(), pageId);
+    }
+
+    public RemoteBlogEntrySummary[] getBlogEntries( String spaceId) throws RemoteException{
+        return service.getBlogEntries( getToken(), spaceId);
+    }
+    
+    public RemoteBlogEntry getBlogEntry( long blogEntryId){
+        return service.getBlogEntry(getToken(),blogEntryId);
     }
 
 }
