@@ -6,6 +6,7 @@
  */
 package org.codehaus.timtam;
 
+import org.codehaus.timtam.views.confluencetree.ConfluenceView;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
@@ -46,5 +47,12 @@ public class TimTamAbstractTestCase extends TestCase{
 	 */
 	public MockConfluenceServer getMockConfServer() {
 		return mockConfServer;
+	}
+
+	/**
+	 * 
+	 */
+	protected ConfluenceView getConfluenceView() {
+		return null;
 	}
 }

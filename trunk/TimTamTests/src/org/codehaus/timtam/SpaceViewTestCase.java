@@ -6,6 +6,10 @@
  */
 package org.codehaus.timtam;
 
+import org.codehaus.timtam.views.confluencetree.ConfluenceView;
+import org.eclipse.jface.viewers.TreeViewer;
+
+
 /**
  * @author Sarah
  *
@@ -14,7 +18,9 @@ package org.codehaus.timtam;
  */
 public class SpaceViewTestCase extends TimTamAbstractTestCase {
 	public void testViewDisplaysSpacesInTree() {
-		
+		ConfluenceView confluenceView = getConfluenceView();
+		TreeViewer confTree = (TreeViewer) confluenceView.getViewer();
+		//make sure tree has expected spaces
 	}
 
 }
