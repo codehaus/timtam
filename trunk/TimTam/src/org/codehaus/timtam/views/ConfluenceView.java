@@ -76,6 +76,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -107,6 +108,7 @@ public class ConfluenceView extends ViewPart {
     private IStructuredSelection selectedPages;
     private IAction pasteAction;
     private IAction cutAction;
+	private Action openInExternalBrowserAction;
 
     class NameSorter extends ViewerSorter {
     }
@@ -176,6 +178,7 @@ public class ConfluenceView extends ViewPart {
         manager.add(refreshNode);
         manager.add(addServer);
         manager.add(new Separator());
+        manager.add(openInExternalBrowserAction);
         drillDownAdapter.addNavigationActions(manager);
         manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
     }
@@ -241,6 +244,21 @@ public class ConfluenceView extends ViewPart {
         pasteAction.setEnabled(false);
         getViewSite().getActionBars().setGlobalActionHandler(
                 ActionFactory.PASTE.getId(), pasteAction);
+        
+        openInExternalBrowserAction = new Action(){
+			public void run() {
+				TreeAdapter[] selectedNodes = getSelectedNodes();
+				for (int i = 0; i < selectedNodes.length; i++) {
+					TreeAdapter adapter = selectedNodes[i];
+					String url = adapter.getUrl();
+					Program.launch(url);
+				}
+			}
+        };
+        openInExternalBrowserAction.setText("Open in external browser");
+        openInExternalBrowserAction.setToolTipText("Opens the selected node in an external browser");
+        openInExternalBrowserAction.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_PAGE));
+        
 
     }
 

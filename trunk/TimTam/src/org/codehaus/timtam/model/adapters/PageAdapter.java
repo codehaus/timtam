@@ -248,8 +248,13 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return space.getSpaceKey();
 	}
 
-	public String getUrl() throws RemoteException {
-		return getPage().url;
+	public String getUrl(){
+		try {
+			return getPage().url;
+		} catch (RemoteException e) {
+			TimTamPlugin.getInstance().logException("Getting page url",e,true);
+		}
+		return null;
 	}
 
 	public String renderContent() throws RemoteException {
