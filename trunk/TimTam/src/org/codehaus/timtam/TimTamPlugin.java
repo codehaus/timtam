@@ -393,7 +393,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
      */
     public void stop(BundleContext context) throws Exception {
         super.stop(context);
-        TimTamModel.getInstace().shutdown();
+        TimTamModel.getInstance().shutdown();
     }
 
     /**
@@ -401,7 +401,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
      */
     public void init() {
         getImageRegistry();
-        TimTamModel.getInstace().startup();
+        TimTamModel.getInstance().startup();
     }
 
 }
