@@ -5,4 +5,8 @@ Bundle-Version: 1.0.0
 Bundle-ClassPath: TimTamTests.jar
 Bundle-Localization: plugin
 Eclipse-AutoStart: true
-Require-Bundle: org.codehaus.timtam
+Require-Bundle: org.codehaus.timtam,
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.runtime.compatibility,
+ org.junit

@@ -5,8 +5,6 @@
  */
 package org.codehaus.timtam;
 
-import java.util.List;
-
 import com.atlassian.confluence.remote.AuthenticationFailedException;
 import com.atlassian.confluence.remote.IConfluenceSoapService;
 import com.atlassian.confluence.remote.InvalidSessionException;
