@@ -29,7 +29,7 @@ public class SpaceViewTestCase extends TimTamAbstractTestCase {
 		// Hacky way of pushing in a mock...
 		TimTamServiceFactory original = TimTamModel.getInstance().getServiceFactory();
 		TimTamModel.getInstance().setServiceFactory(new TimTamServiceFactory(){
-			public ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
+			public ConfluenceService getService(String server, String user,String password, boolean useProxy) {
 				// return mock of ConfluenceService
 				return getMockConfServer();
 			}
