@@ -85,7 +85,7 @@ public class SpaceAdapter implements ConfluenceSpace, IEditorInput,
      * @param spaceSummary
      */
     public SpaceAdapter(RemoteSpaceSummary spaceSummary, ServerAdapter parent,
-            ConfluenceService service) {
+    		ConfluenceService service) {
         this.service = service;
         this.parent = parent;
         this.spaceSummary = spaceSummary;
