@@ -34,8 +34,11 @@
 package org.codehaus.timtam.views;
 import org.codehaus.timtam.model.PageContainer;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 /**
  * @author Zohar
  *  
@@ -57,13 +60,8 @@ public class ConfluenceDropAdapter extends ViewerDropAdapter {
 	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
 	 */
 	public boolean performDrop(Object data) {
-		if (data == null) {
-			return false;
-		}
-		if (!ConfluenceDragListner.TIMTAMD_DND.equals(data)) {
-			return false;
-		}
-		return view.doDragAndDrop(targetAdapter, operation);
+		ISelection selection = LocalSelectionTransfer.getInstance().getSelection();
+		return view.doDragAndDrop(targetAdapter, (IStructuredSelection)selection,operation);
 	}
 	/*
 	 * (non-Javadoc)
@@ -85,4 +83,4 @@ public class ConfluenceDropAdapter extends ViewerDropAdapter {
 		}
 		return false;
 	}
-}
+ }

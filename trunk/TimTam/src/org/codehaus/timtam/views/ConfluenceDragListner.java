@@ -35,7 +35,7 @@ package org.codehaus.timtam.views;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
-import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 /**
  * @author Zohar
  */
@@ -62,6 +62,8 @@ public class ConfluenceDragListner implements DragSourceListener {
 				event.doit  = false;
 			}
 		}
+		
+		LocalSelectionTransfer.getInstance().setSelection(view.getSelection());
 	}
 	/*
 	 * (non-Javadoc)
@@ -69,9 +71,9 @@ public class ConfluenceDragListner implements DragSourceListener {
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
 	 */
 	public void dragSetData(DragSourceEvent event) {
-	if (TextTransfer.getInstance().isSupportedType(event.dataType)) {
-			event.data = TIMTAMD_DND;
-		}
+//	if (LocalSelectionTransfer.getInstance().isSupportedType(event.dataType)) {
+//			event.data = view.getSelection();
+//		}
 	}
 	/*
 	 * (non-Javadoc)
@@ -79,6 +81,5 @@ public class ConfluenceDragListner implements DragSourceListener {
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
 	 */
 	public void dragFinished(DragSourceEvent event) {
-	//	System.out.println("need to do the cut part");
 	}
 }

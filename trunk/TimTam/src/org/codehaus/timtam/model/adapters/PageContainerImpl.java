@@ -41,6 +41,8 @@ import org.codehaus.timtam.model.PageContainer;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePage;
 import com.atlassian.confluence.remote.RemotePageSummary;
 /**
@@ -73,7 +75,7 @@ class PageContainerImpl implements PageContainer {
 	public void removePage(PageAdapter adapter) {
 		pages.remove(adapter);
 	}
-	private PageAdapter createPage(RemotePage newPage) {
+	private PageAdapter createPage(RemotePage newPage) throws NotPermittedException, RemoteException {
 		newPage = service.storePage(newPage);
 		PageAdapter adapter = new PageAdapter(newPage, spaceAdapter, pageAdapter, service);
 		pages.add(adapter);
@@ -82,16 +84,19 @@ class PageContainerImpl implements PageContainer {
 	/**
 	 * @param name
 	 * @return
+	 * @throws RemoteException
+	 * @throws NotPermittedException
 	 */
-	public Object createPage(String name) {
+	public Object createPage(String name) throws NotPermittedException, RemoteException {
 		RemotePage newPage = populatePageInfo(name);
 		return createPage(newPage);
 	}
 	/**
 	 * @param name
 	 * @return
+	 * @throws RemoteException
 	 */
-	private RemotePage populatePageInfo(String name) {
+	private RemotePage populatePageInfo(String name) throws RemoteException {
 		RemotePage newPage = new RemotePage();
 		newPage.content = newPageContent();
 		newPage.space = spaceAdapter.getSpaceKey();
@@ -102,8 +107,8 @@ class PageContainerImpl implements PageContainer {
 		return newPage;
 	}
 	private String newPageContent() {
-		return "Created by [~" + service.getUser() + "]\\\\On " + Calendar.getInstance().getTime()
-				+ "\\\\Using {color:blue}TimTam{color}";
+		return "Created by [~" + service.getUser() + "]\n On " + Calendar.getInstance().getTime()
+				+ "\nUsing {color:blue}TimTam{color}";
 	}
 	/**
 	 * @param summary
@@ -111,7 +116,7 @@ class PageContainerImpl implements PageContainer {
 	public void addPage(RemotePageSummary summary) {
 		pages.add(new PageAdapter(summary, spaceAdapter, pageAdapter, service));
 	}
-	public void deleteAll() {
+	public void deleteAll() throws NotPermittedException, RemoteException {
 		// we make a stable copy as the recursive delete modifies the parent
 		// page container ( us )
 		Object[] pagesCopy = pages.toArray();
@@ -136,7 +141,7 @@ class PageContainerImpl implements PageContainer {
 	 *      boolean, org.eclipse.core.runtime.IProgressMonitor) No Copy support
 	 *      at the moment...
 	 */
-	public void transferPages(Object[] pagesToMove, boolean move, IProgressMonitor monitor) {
+	public void transferPages(Object[] pagesToMove, boolean move, IProgressMonitor monitor) throws RemoteException {
 		monitor.beginTask("Transfering Pages ", pagesToMove.length);
 		for (int i = 0; i < pagesToMove.length; i++) {
 			PageAdapter pageToMove = (PageAdapter) pagesToMove[i];

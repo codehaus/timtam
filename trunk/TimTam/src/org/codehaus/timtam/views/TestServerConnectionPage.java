@@ -80,7 +80,7 @@ public class TestServerConnectionPage extends WizardPage {
 				} catch (LoginFailureException e) {
 					String errorMessage = "Connection to " + details.server + " failed " + e.getMessage();
 					MessageDialog.openError(getShell(), "Error Connecting to Server", errorMessage);
-					TimTamPlugin.getInstance().logException("failed to add a coneection to " + details.server, e);
+					TimTamPlugin.getInstance().logException("failed to add a coneection to " + details.server, e, true);
 				}
 			}
 		});

@@ -38,12 +38,15 @@
 */
 package org.codehaus.timtam.model;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
+
 /**
  * @author zohar melamed
  *
  */
 public interface ConfluenceSpace {
-	public Object createPage(String name);
+	public Object createPage(String name) throws NotPermittedException, RemoteException;
 	public String getName();
 	public String getDescription();
 	public String getUrl();

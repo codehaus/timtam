@@ -38,6 +38,8 @@
 */
 package org.codehaus.timtam.model;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePageHistory;
 
 /**
@@ -46,39 +48,39 @@ import com.atlassian.confluence.remote.RemotePageHistory;
  */
 public interface ConfluencePage {
 	
-	public long getId();
-	public long getParentId();
+	public long getId() throws RemoteException;
+	public long getParentId() throws RemoteException;
 	public String getSpace();
-	public String getUrl();
+	public String getUrl() throws RemoteException;
 	
 	
-	public String getContent();
-	public String renderContent();
-	public String renderContent(String content);
-	public void setContent(String content);
+	public String getContent() throws RemoteException;
+	public String renderContent() throws RemoteException;
+	public String renderContent(String content) throws RemoteException;
+	public void setContent(String content) throws RemoteException;
 	
 	public String getTitle();
-	public void setTitle(String title);
+	public void setTitle(String title) throws RemoteException;
 	
 	
-	public java.util.Date getCreated();
-	public String getCreator();
+	public java.util.Date getCreated() throws RemoteException;
+	public String getCreator() throws RemoteException;
 	public boolean isHomePage();
-	public void setHomePage(boolean homePage);
-	public java.util.Date getModified();
-	public String getModifier();
-	public int getVersion();
-	public RemotePageHistory[] getPageHistory();
+	public void setHomePage(boolean homePage) throws RemoteException;
+	public java.util.Date getModified() throws RemoteException;
+	public String getModifier() throws RemoteException;
+	public int getVersion() throws RemoteException;
+	public RemotePageHistory[] getPageHistory() throws RemoteException;
 	
 	
-	public void save();
-	public void rename(String name);
-	public Object createPage(String name);
+	public void save() throws NotPermittedException, RemoteException;
+	public void rename(String name) throws NotPermittedException, RemoteException;
+	public Object createPage(String name) throws NotPermittedException, RemoteException;
 	
 	public void refresh();
 	public void setDirty();
 	public boolean isDirty();
-	public void delete();
+	public void delete() throws NotPermittedException, RemoteException;
 	public boolean isReadOnly();
 
 

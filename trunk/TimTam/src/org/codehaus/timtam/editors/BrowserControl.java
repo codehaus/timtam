@@ -56,6 +56,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
+
+import com.atlassian.confluence.remote.RemoteException;
 /**
  * @author Zohar
  * 
@@ -152,7 +154,11 @@ public class BrowserControl extends Composite {
 					browser.back();
 					setEnabled(browser.isBackEnabled());
 				} else if (!backAtDocument) {
-					browser.setText(page.renderContent());
+					try {
+                        browser.setText(page.renderContent());
+                    } catch (RemoteException e) {
+                        TimTamPlugin.getInstance().logException("failed to get page content",e,true);
+                    }
 					backAtDocument = true;
 					setEnabled(false);
 				}
@@ -188,7 +194,11 @@ public class BrowserControl extends Composite {
 			public void run() {
 				if (backAtDocument) {
 					page.refresh();
-					browser.setText(page.renderContent());
+					try {
+                        browser.setText(page.renderContent());
+                    } catch (RemoteException e) {
+                        TimTamPlugin.getInstance().logException("failed to get page content",e,true);
+                    }
 				} else {
 					browser.refresh();
 				}

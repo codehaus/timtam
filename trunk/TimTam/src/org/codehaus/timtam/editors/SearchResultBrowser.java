@@ -33,6 +33,7 @@
  */
 package org.codehaus.timtam.editors;
 
+import org.codehaus.timtam.model.SearchResultBrowserInput;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -61,6 +62,12 @@ public class SearchResultBrowser extends EditorPart {
 	 */
 	public void createPartControl(Composite parent)  {
 		browser = new Browser(parent,SWT.NULL);
+		SearchResultBrowserInput browserInput =  (SearchResultBrowserInput) getEditorInput();
+		if(browserInput != null){
+			String url = browserInput.getUrl();
+			navigateTo(url);
+		}
+
 	}
 
 	/**
@@ -106,6 +113,9 @@ public class SearchResultBrowser extends EditorPart {
 
 	public void navigateTo(String url){
 		browser.setUrl(url);
-		setTitle(url);
+		setPartName(url);
+		SearchResultBrowserInput browserInput =  (SearchResultBrowserInput) getEditorInput();
+		browserInput.setUrl(url);
+
 	}
 }

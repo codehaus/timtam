@@ -41,6 +41,8 @@ package org.codehaus.timtam.model.adapters;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
+import com.atlassian.confluence.remote.RemoteException;
+
 /**
  * @author zohar melamed
  *  
@@ -58,6 +60,6 @@ public interface TreeAdapter {
 	public abstract String getText();
 
 	public abstract Integer getType();
-	public abstract void refresh(IProgressMonitor monitor);
+	public abstract void refresh(IProgressMonitor monitor) throws RemoteException;
 	
 }

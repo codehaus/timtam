@@ -39,14 +39,17 @@
 
 package org.codehaus.timtam.template;
 
-import org.eclipse.jface.text.templates.ContextType;
+import org.eclipse.jface.text.templates.TemplateContextType;
+
+
 
 /**
  */
-public class ConfluenceContextType extends ContextType{
+public class ConfluenceContextType extends TemplateContextType{
 	public static final String CONTEXT_TYPE = "org.codehaus.timtam.conluence.markup";
 	/**
 	 */
 	public ConfluenceContextType() {
+		super(CONTEXT_TYPE);
 	}
 }

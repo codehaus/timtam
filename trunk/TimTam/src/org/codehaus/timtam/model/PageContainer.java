@@ -40,13 +40,16 @@
 package org.codehaus.timtam.model;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
+
 /**
  * @author Zohar
  */
 public interface PageContainer {
 	public boolean hasPages();
 	public Object[] getPages();
-	public Object createPage(String name);
+	public Object createPage(String name) throws NotPermittedException, RemoteException;
 	public boolean isReadOnly();
-	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor);
+	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) throws RemoteException;
 }

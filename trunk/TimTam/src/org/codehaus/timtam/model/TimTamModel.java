@@ -58,6 +58,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import com.atlassian.confluence.remote.RemoteException;
 import com.thoughtworks.xstream.XStream;
 /**
  * @author zohar melamed
@@ -162,7 +163,7 @@ public class TimTamModel {
 		try {
 			accountDetailsAsXML = IOUtil.toString(new FileReader(accountsFile));
 		} catch (Exception e) {
-			TimTamPlugin.getInstance().logException("faild loading accounts", e);
+			TimTamPlugin.getInstance().logException("faild loading accounts", e, true);
 		}
 		if (accountDetailsAsXML.length() > 0) {
 			XStream xstream = new XStream();
@@ -172,7 +173,7 @@ public class TimTamModel {
 				try {
 					addServer(details);
 				} catch (LoginFailureException e) {
-					plugin.logException("failed connecting to server", e);
+					plugin.logException("failed connecting to server", e, true);
 				}
 			}
 		}
@@ -190,7 +191,7 @@ public class TimTamModel {
 			writer.write(accountDetailsAsXML);
 			writer.close();
 		} catch (IOException e) {
-			plugin.logException("failed saving accounts", e);
+			plugin.logException("failed saving accounts", e, true);
 		}
 	}
 	/**
@@ -199,7 +200,11 @@ public class TimTamModel {
 	public void refresh(final TreeAdapter adapter) {
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) {
-				adapter.refresh(monitor);
+				try {
+                    adapter.refresh(monitor);
+                } catch (RemoteException e) {
+                    plugin.logException("Refersh failed",e,true);
+                }
 			}
 		};
 		GUIUtil.runOperationWithProgress(op, null);
@@ -224,8 +229,9 @@ public class TimTamModel {
 	}
 	/**
 	 * @param string
+	 * @throws RemoteException
 	 */
-	public Collection search(String query) {
+	public Collection search(String query) throws RemoteException {
 		// run search on all servers and agg results
 		ArrayList result = new ArrayList();
 		for (Iterator adapter = serverAdapters.iterator(); adapter.hasNext();) {
@@ -235,6 +241,12 @@ public class TimTamModel {
 		}
 		
 		return result;
+	}
+	/**
+	 * @return
+	 */
+	public ServerAdapter[] getServers() {
+		return (ServerAdapter[]) serverAdapters.toArray(new ServerAdapter[serverAdapters.size()]);
 	}
 }
 class TimTamLabelProvider extends LabelProvider {

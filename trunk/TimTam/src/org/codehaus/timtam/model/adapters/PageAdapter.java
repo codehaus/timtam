@@ -44,9 +44,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.model.*;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.codehaus.timtam.model.ConfluenceService;
+import org.codehaus.timtam.model.PageContainer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -54,6 +54,8 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePage;
 import com.atlassian.confluence.remote.RemotePageHistory;
 import com.atlassian.confluence.remote.RemotePageSummary;
@@ -112,7 +114,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return pageSummary.title;
 	}
 
-	public RemotePage getPage() {
+	public RemotePage getPage() throws RemoteException {
 		if (page == null) {
 			page = service.getPage(pageSummary.id);
 		}
@@ -142,9 +144,15 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 
 	public String getToolTipText() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(getTitle()).append("\nVersion : ").append(getVersion());
-		buffer.append("\nLast modified by ").append(getModifier()).append(" - On ").append(getModified());
-		buffer.append("\nCreated by ").append(getCreator()).append(" On ").append(getCreated());
+		
+		try {
+            buffer.append(getTitle()).append("\nVersion : ").append(getVersion());
+            buffer.append("\nLast modified by ").append(getModifier()).append(" - On ").append(getModified());
+            buffer.append("\nCreated by ").append(getCreator()).append(" On ").append(getCreated());
+        } catch (RemoteException e) {
+            TimTamPlugin.getInstance().logException("failed to get page",e, true);
+        }
+        
 		return buffer.toString();
 	}
 
@@ -163,27 +171,27 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		this.dirty = dirty;
 	}
 
-	public String getContent() {
+	public String getContent() throws RemoteException {
 		return getPage().content;
 	}
 
-	public Date getCreated() {
+	public Date getCreated() throws RemoteException {
 		return getPage().created;
 	}
 
-	public String getCreator() {
+	public String getCreator() throws RemoteException {
 		return getPage().creator;
 	}
 
-	public Date getModified() {
+	public Date getModified() throws RemoteException {
 		return getPage().modified;
 	}
 
-	public String getModifier() {
+	public String getModifier() throws RemoteException {
 		return getPage().modifier;
 	}
 
-	public int getVersion() {
+	public int getVersion() throws RemoteException {
 		return getPage().version;
 	}
 
@@ -191,7 +199,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return homePage;
 	}
 
-	public void save() {
+	public void save() throws NotPermittedException, RemoteException {
 		page = service.storePage(page);
 		pageSummary = page;
 		history = null;
@@ -204,7 +212,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		history = null;
 	}
 
-	public void setContent(String content) {
+	public void setContent(String content) throws RemoteException {
 		getPage().content = content;
 	}
 
@@ -212,7 +220,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		dirty = true;
 	}
 
-	public void setHomePage(boolean homePage) {
+	public void setHomePage(boolean homePage) throws RemoteException {
 		getPage().homePage = homePage;
 	}
 
@@ -220,15 +228,15 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return getName();
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(String title) throws RemoteException {
 		getPage().title = title;
 	}
 
-	public long getId() {
+	public long getId() throws RemoteException {
 		return getPage().id;
 	}
 
-	public long getParentId() {
+	public long getParentId() throws RemoteException {
 		return getPage().parentId;
 	}
 
@@ -236,21 +244,21 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return space.getSpaceKey();
 	}
 
-	public String getUrl() {
+	public String getUrl() throws RemoteException {
 		return getPage().url;
 	}
 
-	public String renderContent() {
+	public String renderContent() throws RemoteException {
 		RemotePage myPage = getPage();
 		return service.renderContent(myPage.space, myPage.id, myPage.content);
 	}
 
-	public String renderContent(String content) {
+	public String renderContent(String content) throws RemoteException {
 		RemotePage myPage = getPage();
 		return service.renderContent(myPage.space, myPage.id, content);
 	}
 
-	public Object createPage(String name) {
+	public Object createPage(String name) throws NotPermittedException, RemoteException {
 		return childPages.createPage(name);
 	}
 
@@ -263,7 +271,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		refresh();
 	}
 
-	public void rename(String name) {
+	public void rename(String name) throws NotPermittedException, RemoteException {
 		String oldName = pageSummary.title;
 		try {
 			page.title = name;
@@ -274,7 +282,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		}
 	}
 
-	public void delete() {
+	public void delete() throws NotPermittedException, RemoteException {
 		// del bottom up
 		childPages.deleteAll();
 		service.deletePage(getPage().id);
@@ -312,7 +320,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[], boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
+	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) throws RemoteException {
 		childPages.transferPages(pagesToCopy, move, monitor);
 	}
 
@@ -320,7 +328,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.ConfluencePage#getPageHistory()
 	 */
-	public RemotePageHistory[] getPageHistory() {
+	public RemotePageHistory[] getPageHistory() throws RemoteException {
 		if(history == null){
 			history  = service.getPageHistory(getId());
 		}

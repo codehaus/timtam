@@ -79,7 +79,7 @@ public class SpaceEditor extends EditorPart {
 		if (space == null) {
 			throw new PartInitException("The space editor can pny be backed by a space");
 		}
-		setTitle(space.getName());
+		setPartName(space.getName());
 	}
 	/*
 	 * (non-Javadoc)

@@ -52,11 +52,11 @@ import org.eclipse.jface.text.GapTextStore;
 public class ConfluenceDocument extends AbstractDocument {
 	public ConfluenceDocument(String content) {
 		super();
-		setLineTracker(new DefaultLineTracker());
+		DefaultLineTracker defaultLineTracker = new DefaultLineTracker();
+		setLineTracker(defaultLineTracker);
 		GapTextStore store = new GapTextStore(50, 300);
 		store.set(content);
 		setTextStore(store);
-		//setDocumentPartitioner(new DefaultPartitioner());
 		completeInitialization();
 	}
 }
