@@ -66,6 +66,7 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 import electric.util.classloader.ClassLoaders;
 
@@ -334,4 +335,16 @@ public class TimTamPlugin extends AbstractUIPlugin {
 		return getImageRegistry().get(IMG_SPACE);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+	 */
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+	}
+	/* (non-Javadoc)
+	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 */
+	public void stop(BundleContext context) throws Exception {
+		super.stop(context);
+	}
 }
