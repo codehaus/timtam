@@ -39,15 +39,21 @@
 
 package org.codehaus.timtam.editors;
 
+import org.codehaus.timtam.TimTamPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.TextEditorAction;
 
 /**
  * Manages the installation/deinstallation of global actions for multi-page editors.
@@ -56,6 +62,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  */
 public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarContributor {
 	private IEditorPart activeEditorPart;
+	private FormatContentAction formatContent;
 	/**
 	 * Creates a multi-page contributor.
 	 */
@@ -113,17 +120,21 @@ public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarCo
 			actionBars.updateActionBars();
 			//actionBars.setGlobalActionHandler("org.codehaus.timtam.edit.toggle",toggleView) ;
 
+			formatContent.setEditor(editor);
+			formatContent.update();
 		}
 	}
 	private void createActions() {
-//		toggleView = new Action() {
-//			public void run() {
-//				MessageDialog.openInformation(null, "TimTam Plug-in", "Sample Action Executed");
-//			}
-//		};
-//		toggleView.setActionDefinitionId("org.codehaus.timtam.edit.toggle");
+		formatContent = new FormatContentAction();
 	}
+	
 	public void contributeToMenu(IMenuManager manager) {
+		IMenuManager editMenu= manager.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
+		if (editMenu != null) {
+			editMenu.add(new Separator());
+			editMenu.add(formatContent);
+		}	
+		
 //		IMenuManager menu = new MenuManager("Editor &Menu");
 //		manager.prependToGroup(IWorkbenchActionConstants.MB_ADDITIONS, menu);
 //		menu.add(sampleAction);
@@ -131,5 +142,25 @@ public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarCo
 	public void contributeToToolBar(IToolBarManager manager) {
 //		manager.add(new Separator());
 //		manager.add(sampleAction);
+	}
+}
+
+class FormatContentAction extends TextEditorAction{
+
+	/**
+	 * @param bundle
+	 * @param prefix
+	 * @param editor
+	 */
+	protected FormatContentAction() {
+		super(TimTamPlugin.getInstance().getResourceBundle(), "FormatContent.", null);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.IAction#run()
+	 */
+	public void run() {
+		ITextOperationTarget target = (ITextOperationTarget) getTextEditor().getAdapter(ITextOperationTarget.class);
+		target.doOperation(ISourceViewer.FORMAT);
 	}
 }
