@@ -112,7 +112,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 			editor = new ConflunceMarkupEditor();
 			IEditorInput input = getEditorInput();
 			int index = addPage(editor, input);
-			setPageText(index, "Edit");
+			setPageText(index, "&Edit");
 			IDocumentProvider provider = editor.getDocumentProvider();
 			IDocument document = provider.getDocument(input);
 			document.addDocumentListener(this);			
@@ -127,7 +127,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 		composite.setLayout(layout);
 		createBrowser(composite, getEditorSite().getActionBars());
 		previewPageIndex = addPage(composite);
-		setPageText(previewPageIndex, "Preview");
+		setPageText(previewPageIndex, "&Preview");
 	}
 	/**
 	 * Creates the pages of the multi-page editor.

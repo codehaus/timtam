@@ -100,20 +100,4 @@
       </perspective>
    </extension>
 
-   <extension 
-         point="org.eclipse.ui.commands">
-      <command
-            name="Toggle Edit/Preview"
-            description="Toggle Between Edit and Preview Mode"
-            category="org.eclipse.ui.category.edit"
-            id="org.codehaus.timtam.edit.toggle">
-      </command>
-      <keyBinding
-            string="Ctrl+."
-            scope="org.eclipse.ui.textEditorScope"
-            command="org.codehaus.timtam.edit.toggle"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-   </extension>
-
 </plugin>
