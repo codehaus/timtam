@@ -39,11 +39,9 @@
 
 package org.codehaus.timtam.editors;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionFactory;
@@ -58,7 +56,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  */
 public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarContributor {
 	private IEditorPart activeEditorPart;
-	//private Action sampleAction;
 	/**
 	 * Creates a multi-page contributor.
 	 */
@@ -84,6 +81,7 @@ public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarCo
 		activeEditorPart = part;
 
 		IActionBars actionBars = getActionBars();
+		
 		if (actionBars != null) {
 
 			ITextEditor editor = (part instanceof ITextEditor) ? (ITextEditor) part : null;
@@ -113,15 +111,17 @@ public class TimTamMultiPageEditorContributor extends MultiPageEditorActionBarCo
 				ActionFactory.FIND.getId(),
 				getAction(editor, ITextEditorActionConstants.FIND));
 			actionBars.updateActionBars();
+			//actionBars.setGlobalActionHandler("org.codehaus.timtam.edit.toggle",toggleView) ;
+
 		}
 	}
 	private void createActions() {
-		Action toggleView = new Action() {
-			public void run() {
-				MessageDialog.openInformation(null, "TimTam Plug-in", "Sample Action Executed");
-			}
-		};
-		toggleView.setActionDefinitionId("org.codehaus.timtam.edit.toggle");
+//		toggleView = new Action() {
+//			public void run() {
+//				MessageDialog.openInformation(null, "TimTam Plug-in", "Sample Action Executed");
+//			}
+//		};
+//		toggleView.setActionDefinitionId("org.codehaus.timtam.edit.toggle");
 	}
 	public void contributeToMenu(IMenuManager manager) {
 //		IMenuManager menu = new MenuManager("Editor &Menu");

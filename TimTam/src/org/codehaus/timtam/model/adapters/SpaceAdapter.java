@@ -61,12 +61,14 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  *  
  */
 public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
-	private static Image icon;
+	private static Image spaceIcon;
+	private static Image brokenSpaceIcon;
 	private RemoteSpaceSummary spaceSummary;
 	private RemoteSpace space;
 	private ServerAdapter parent;
 	private Map pages = new HashMap();
 	private ConfluenceService service;
+	private boolean loadedOk;
 	/**
 	 * @param spaceSummary
 	 */
@@ -74,12 +76,19 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 		this.service = service;
 		this.parent = parent;
 		this.spaceSummary = spaceSummary;
-		if (icon == null) {
-			icon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_SPACE);
+		if (spaceIcon == null) {
+			spaceIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_SPACE);
 		}
+		
+		if (brokenSpaceIcon == null) {
+			brokenSpaceIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_BROKEN_SPACE);
+		}
+		
 	}
 	public void refresh(IProgressMonitor monitor) {
+		
 		pages.clear();
+		loadedOk = false;
 		monitor.setTaskName("Loading Space " + spaceSummary.name);
 		space = service.getSpace(spaceSummary.key);
 		monitor.subTask("Getting Pages ...");
@@ -93,6 +102,7 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 				children[i] = new PageAdapter(summary, this, null, service);
 				++i;
 			}
+			loadedOk = true;
 		} catch (Exception e) {
 			ErrorDialog.openError(null, "Error Loading Space : "+spaceSummary.name,
 					e.getMessage(), new Status(IStatus.WARNING,"TimTam", IStatus.OK, "Error getting pages", e));
@@ -119,7 +129,7 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 		return childrenList == null ? Collections.EMPTY_LIST : childrenList;
 	}
 	public Image getImage() {
-		return icon;
+		return loadedOk ? spaceIcon:brokenSpaceIcon;
 	}
 	public Object getParent() {
 		return parent;

@@ -71,6 +71,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	private ResourceBundle resourceBundle;
 	private static boolean trace;
 	public static final String IMG_SPACE = "icons/space.gif";
+	public static final String IMG_BROKEN_SPACE= "icons/broken-space.gif";
 	public static final String IMG_SPACEHOME = "icons/spaceHome.gif";
 	public static final String IMG_PAGE = "icons/page.gif";
 	public static final String IMG_EDIT_PAGE= "icons/editPage.gif";
@@ -170,6 +171,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
 		registry.put(IMG_SERVER, loadImage(IMG_SERVER));
 		registry.put(IMG_PAGE, loadImage((IMG_PAGE)));
 		registry.put(IMG_SPACE, loadImage((IMG_SPACE)));
+		registry.put(IMG_BROKEN_SPACE, loadImage((IMG_BROKEN_SPACE)));
 		registry.put(IMG_SPACEHOME, loadImage((IMG_SPACEHOME)));
 		registry.put(IMG_REFRESH, loadImage((IMG_REFRESH)));
 
