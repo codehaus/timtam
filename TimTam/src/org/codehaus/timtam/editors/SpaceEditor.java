@@ -157,28 +157,12 @@ public class SpaceEditor extends EditorPart implements IHyperlinkListener{
 		});
 		
 		info.setBackground(section.getTitleBarGradientBackground());
-		
-//		Browser browser = new Browser(section,SWT.FLAT);
-//		toolkit.adapt(browser,true,true);
-//		section.setTextClient(browser);
-//		StringBuffer spaceInfo = new StringBuffer();
-//					ChannelIF newPageChannel; 
-//		URL newPagesRss;
-//        try {
-//            newPagesRss = new URL("http://wiki.london.echonet/spaces/rss.action?rss.action?key="+space.getKey()+"&newPages=true");
-//            newPageChannel = RSSParser.parse(new ChannelBuilder(), newPagesRss);
-//        } catch (Exception e) {
-//            TimTamPlugin.getInstance().logException("failed to get new pages rss feed",e,true);
-//        }
-        
-//        browser.setText("<html><b> Boo!</b></html>");
-		//spaceInfo.append("")
 		createClient(section , toolkit);
 	}
 	private Section createStaticSection(Composite parent, FormToolkit toolkit) {
 		Section section = toolkit.createSection(parent, Section.TITLE_BAR);
 		//section.clientVerticalSpacing = PDESection.CLIENT_VSPACING;
-		//toolkit.createCompositeSeparator(section);
+		toolkit.createCompositeSeparator(section);
 		return section;
 	}
 	
