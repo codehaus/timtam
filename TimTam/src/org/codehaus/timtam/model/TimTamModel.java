@@ -51,8 +51,8 @@ import org.apache.commons.io.IOUtil;
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.adapters.ServerAdapter;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
+import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -140,17 +140,12 @@ public class TimTamModel {
 	private void loadServerData(final ServerAdapter adapter) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				try {
-					new ProgressMonitorDialog(Display.getDefault()
-							.getActiveShell()).run(false, true,
-							new IRunnableWithProgress() {
-								public void run(IProgressMonitor monitor) {
-									adapter.refresh(monitor);
-								}
-							});
-				} catch (Exception e) {
-					plugin.logException("failed connecting to server", e);
-				}
+				IRunnableWithProgress op = new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) {
+						adapter.refresh(monitor);
+					}
+				};
+				GUIUtil.runOperationWithProgress(op,null);
 			}
 		});
 	}
@@ -217,16 +212,12 @@ public class TimTamModel {
 	 * @param adapter
 	 */
 	public void refresh(final TreeAdapter adapter) {
-		try {
-			new ProgressMonitorDialog(Display.getDefault().getActiveShell())
-					.run(false, true, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) {
-							adapter.refresh(monitor);
-						}
-					});
-		} catch (Exception e) {
-			plugin.logException("failed connecting to server", e);
-		}
+		IRunnableWithProgress op  = new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) {
+				adapter.refresh(monitor);
+			}
+		};
+		GUIUtil.runOperationWithProgress(op,null);
 	}
 	/**
 	 * @param adapter

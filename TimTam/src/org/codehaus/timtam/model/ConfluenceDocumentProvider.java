@@ -71,7 +71,7 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 	 */
 	public boolean isModifiable(Object element) {
 		ConfluencePage page = (ConfluencePage) element;
-		return !page.readOnly();
+		return !page.isReadOnly();
 	}
 
 	/*

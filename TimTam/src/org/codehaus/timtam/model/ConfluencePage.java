@@ -76,7 +76,7 @@ public interface ConfluencePage {
 	public void setDirty();
 	public boolean isDirty();
 	public void delete();
-	public boolean readOnly();
+	public boolean isReadOnly();
 
 	
 }
