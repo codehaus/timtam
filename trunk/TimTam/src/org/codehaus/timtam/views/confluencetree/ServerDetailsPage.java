@@ -58,8 +58,7 @@ import org.eclipse.swt.widgets.Text;
  */
 public class ServerDetailsPage extends WizardPage {
 
-//	protected String server = "http://confluence.atlassian.com";
-	protected String server = "http://wiki.london.echonet";
+	protected String server = "http://confluence.atlassian.com";
 	protected String user = "melamedz";
 	protected String password = "trustno1";
 	protected boolean useProxy = false;
