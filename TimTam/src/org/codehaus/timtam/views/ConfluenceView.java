@@ -255,6 +255,7 @@ public class ConfluenceView extends ViewPart {
 		action.setToolTipText("Rename The Selected Page");
 		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_RENAME_PAGE));
 		// rename is disabled due to (another ) bug in conf CONF-974
+		action.setEnabled(false);
 		actionList.add(action);
 		return actionList;
 	}
