@@ -55,22 +55,40 @@ public class GUIUtil {
 		try{
 			dialog.run(true,false,operation);
 		} catch (final Exception e) {
-			execOnDidplayThread(new Runnable(){
-				public void run(){
-					MessageDialog.openError(shell,"TimTam Error", e.getMessage());		
-				}
-			},false);
-			
-			TimTamPlugin.getInstance().logException("failed refreshing space", e);
+			reportException("TimTam Error",e);
 		}							
 		
 	}
 	
 	public static void execOnDidplayThread(Runnable op, boolean async){
 		if(async){
-			Display.getCurrent().asyncExec(op);
+			Display.getDefault().asyncExec(op);
 		}else{
-			Display.getCurrent().syncExec(op);
+			Display.getDefault().syncExec(op);
 		}
 	}
+
+	/**
+	 * @param string
+	 * @param e
+	 */
+	public static void reportException(final String title, final Exception e) {
+		execOnDidplayThread(new Runnable(){
+			public void run(){
+				MessageDialog.openError(null,title, e.getMessage());		
+			}
+		},false);
+		
+		TimTamPlugin.getInstance().logException(title, e);
+		
+	}
+	
+	public static void safeWarn(final String title, final String msg) {
+		execOnDidplayThread(new Runnable(){
+			public void run(){
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(),title, msg);		
+			}
+		},false);
+	}
+	
 }

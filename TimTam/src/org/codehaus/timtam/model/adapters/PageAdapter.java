@@ -44,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.model.*;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.codehaus.timtam.model.ConfluenceService;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,15 +61,17 @@ import com.atlassian.confluence.remote.RemotePageSummary;
  * @author zohar melamed
  *  
  */
-public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
-	private PageContainer conatiner;
-	private RemotePageSummary pageSummary;
-	private PageAdapter parent;
+public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,PageContainer {
+	PageContainerImpl childPages;
+	RemotePageSummary pageSummary;
+	PageAdapter parent;
 	private RemotePage page;
 	private boolean dirty;
 	private boolean homePage;
 	private ConfluenceService service;
-	private SpaceAdapter space;
+	SpaceAdapter space;
+	
+	
 	/**
 	 * @param spaceSummary
 	 */
@@ -82,15 +85,15 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 		parent = parentPage;
 		homePage = (pageSummary.id == spaceAdapter.getHomepageId()); 
 		
-		conatiner = new PageContainer(service,spaceAdapter,this);
+		childPages = new PageContainerImpl(service,spaceAdapter,this);
 		
 		this.pageSummary = pageSummary;
 		this.service = service;
 
-		List childPages = space.getChildren(pageSummary.id);
-		for (Iterator iter = childPages.iterator(); iter.hasNext();) {
+		List pages = space.getChildren(pageSummary.id);
+		for (Iterator iter = pages.iterator(); iter.hasNext();) {
 			RemotePageSummary summary = (RemotePageSummary) iter.next();
-			conatiner.addPage(summary);
+			childPages.addPage(summary);
 		}
 	}
 
@@ -184,6 +187,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 
 	public void save() {
 		page = service.storePage(page);
+		pageSummary = page;
 		dirty = false;
 	}
 
@@ -220,8 +224,8 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 		return getPage().parentId;
 	}
 
-	public String getSpace() {
-		return getPage().space;
+	public String getSpace(){
+		return space.getSpaceKey();
 	}
 
 	public String getUrl() {
@@ -238,8 +242,8 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 		return service.renderContent(myPage.space, myPage.id, content);
 	}
 
-	public Object createChild(String name) {
-		return conatiner.createPage(name);
+	public Object createPage(String name) {
+		return childPages.createPage(name);
 	}
 
 	public Integer getType() {
@@ -264,29 +268,46 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 
 	public void delete() {
 		// del bottom up
-		conatiner.deleteAll();
+		childPages.deleteAll();
 		service.deletePage(getPage().id);
 		if (parent != null) {
-			parent.removeChild(this);
+			parent.removePage(this);
 		} else {
 			space.removePage(this);
 		}
 	}
 	
-	private void removeChild(PageAdapter adapter) {
-		conatiner.removePage(adapter);
+	public void removePage(PageAdapter adapter) {
+		childPages.removePage(adapter);
 	}
 
 	public boolean isReadOnly() {
 		return space.isReadOnly();
 	}
 
+	public Object[] getPages() {
+		return childPages.getPages();
+	}
+
+	public boolean hasPages() {
+		return childPages.hasPages();
+	}
 	public Object[] getChildren() {
-		return conatiner.getChildren();
+		return getPages();
 	}
 
 	public boolean hasChildren() {
-		return conatiner.hasChildren();
+		return hasPages();
 	}
+
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[], boolean, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
+		childPages.transferPages(pagesToCopy, move, monitor);
+	}
+	
+
 }
 

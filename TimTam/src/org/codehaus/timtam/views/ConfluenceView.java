@@ -32,11 +32,13 @@
  *  
  */
 package org.codehaus.timtam.views;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.codehaus.timtam.model.ConfluenceSpace;
@@ -55,6 +57,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -62,13 +65,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -80,6 +82,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 public class ConfluenceView extends ViewPart {
@@ -114,9 +117,10 @@ public class ConfluenceView extends ViewPart {
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
-		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
-		viewer.addDragSupport(DND.DROP_MOVE, transfers, new ConfluenceDragListner(this));
-		viewer.addDropSupport(DND.DROP_MOVE, transfers, new ConfluenceDropAdapter(viewer));
+//		D&D support on ice pending bug fixes in conf ...
+//		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
+//		viewer.addDragSupport(DND.DROP_MOVE , transfers, new ConfluenceDragListner(this));
+//		viewer.addDropSupport(DND.DROP_MOVE , transfers, new ConfluenceDropAdapter(this));
 	}
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -330,7 +334,7 @@ public class ConfluenceView extends ViewPart {
 		InputDialog dialog = new InputDialog(getSite().getShell(), "New Name ?", "Enter New Name", null, null);
 		if (dialog.open() == Window.OK) {
 			ConfluencePage page = (ConfluencePage) getSelectedNode();
-			Object child = page.createChild(dialog.getValue());
+			Object child = page.createPage(dialog.getValue());
 			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(new Object[]{child}), true);
 			openEditor(child);
@@ -459,5 +463,54 @@ public class ConfluenceView extends ViewPart {
 	 */
 	public void setFocus() {
 		viewer.getControl().setFocus();
+	}
+	/**
+	 * @return
+	 */
+	public Viewer getViewer() {
+		return viewer;
+	}
+	/**
+	 *  
+	 */
+	public boolean doDragAndDrop(final TreeAdapter targetAdapter, final int operation) {
+		TreeAdapter[] adapters = getSelectedNodes();
+		// no droping into a selected node
+		for (int i = 0; i < adapters.length; i++) {
+			TreeAdapter adapter = adapters[i];
+			if (adapter == targetAdapter) {
+				MessageDialog.openInformation(getSite().getShell(), "Invalid Page Tranfer",
+						"Same Page Can Not Be Both Target And Source");
+				return false;
+			}
+			
+		}
+		
+		
+		StringBuffer title = new StringBuffer("Selecting OK Will ");
+		title.append(operation == DND.DROP_COPY ? "Copy" : "Move");
+		title.append(" The Following Pages To : ");
+		title.append(targetAdapter.getText());
+		ListSelectionDialog dialog = new ListSelectionDialog(getSite().getShell(), adapters,
+				new ArrayContentProvider(), model.getLabelProvider(), title.toString());
+		dialog.setInitialSelections(adapters);
+		if (dialog.open() == Window.OK) {
+			final Object[] pagesToCopy = dialog.getResult();
+			ProgressMonitorDialog progressMonitor = new ProgressMonitorDialog(getSite().getShell());
+			try {
+				progressMonitor.run(true, false, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						model.transferPages(targetAdapter, pagesToCopy, operation == DND.DROP_MOVE, monitor);
+					}
+				});
+			} catch (Exception e) {
+				GUIUtil.reportException("Tranfering Pages Failed",e);
+				return false;
+			}
+			viewer.refresh();
+			viewer.setSelection(new StructuredSelection(targetAdapter),true);
+			return true;
+		}
+		return false;
 	}
 }

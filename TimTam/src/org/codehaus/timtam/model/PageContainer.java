@@ -36,47 +36,17 @@
 *
 *
 */
+
 package org.codehaus.timtam.model;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * @author MelamedZ
- *
+ * @author Zohar
  */
-public interface ConfluencePage {
-	
-	public long getId();
-	public long getParentId();
-	public String getSpace();
-	public String getUrl();
-	
-	
-	public String getContent();
-	public String renderContent();
-	public String renderContent(String content);
-	public void setContent(String content);
-	
-	public String getTitle();
-	public void setTitle(String title);
-	
-	
-	public java.util.Date getCreated();
-	public String getCreator();
-	public boolean isHomePage();
-	public void setHomePage(boolean homePage);
-	public java.util.Date getModified();
-	public String getModifier();
-	public int getVersion();
-	
-	
-	public void save();
-	public void rename(String name);
+public interface PageContainer {
+	public boolean hasPages();
+	public Object[] getPages();
 	public Object createPage(String name);
-	
-	public void refresh();
-	public void setDirty();
-	public boolean isDirty();
-	public void delete();
 	public boolean isReadOnly();
-
-	
+	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor);
 }

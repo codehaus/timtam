@@ -1,41 +1,36 @@
 /*
-*
-* Copyright 2003(c)  Zohar Melamed
-* All rights reserved.
-*
-
- Redistribution and use of this software and associated documentation
- ("Software"), with or without modification, are permitted provided
- that the following conditions are met:
-
- 1. Redistributions of source code must retain copyright
-    statements and notices.  Redistributions must also contain a
-    copy of this document.
-
- 2. Redistributions in binary form must reproduce the
-    above copyright notice, this list of conditions and the
-    following disclaimer in the documentation and/or other
-    materials provided with the distribution.
-
- 3. Due credit should be given to The Codehaus and Contributors
-    http://timtam.codehaus.org/
-
- THIS SOFTWARE IS PROVIDED BY THE CODEHAUS AND CONTRIBUTORS
- ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
- NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
- THE CODEHAUS OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*
-*
-*/
+ * 
+ * Copyright 2003(c) Zohar Melamed All rights reserved.
+ * 
+ * 
+ * Redistribution and use of this software and associated documentation
+ * ("Software"), with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain copyright statements and
+ * notices. Redistributions must also contain a copy of this document.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * 
+ * 3. Due credit should be given to The Codehaus and Contributors
+ * http://timtam.codehaus.org/
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE CODEHAUS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE CODEHAUS OR ITS CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ *  
+ */
 package org.codehaus.timtam.model;
 import java.io.File;
 import java.io.FileReader;
@@ -62,7 +57,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.thoughtworks.xstream.XStream;
-
 /**
  * @author zohar melamed
  *  
@@ -87,8 +81,7 @@ class AccountDetails {
 		if (!(that instanceof AccountDetails))
 			return false;
 		AccountDetails details = (AccountDetails) that;
-		return url.equals(details.url) && user.equals(details.user)
-				&& password.equals(details.password);
+		return url.equals(details.url) && user.equals(details.user) && password.equals(details.password);
 	}
 }
 public class TimTamModel {
@@ -99,7 +92,6 @@ public class TimTamModel {
 	protected List accountDetails = new ArrayList();
 	Map adapterToAccountDetails = new HashMap();
 	final TimTamPlugin plugin = TimTamPlugin.getInstance();
-	
 	private TimTamModel() {
 	}
 	/**
@@ -107,31 +99,25 @@ public class TimTamModel {
 	 * @param user
 	 * @param password
 	 */
-	public void addServer(String server, String user, String password)
-			throws LoginFailureException {
+	public void addServer(String server, String user, String password) throws LoginFailureException {
 		AccountDetails details = new AccountDetails(server, user, password);
 		loadServerData(addServer(details));
 		accountDetails.add(details);
 	}
-
-	private ServerAdapter addServer(AccountDetails account)
-			throws LoginFailureException {
-		ConfluenceService service = ConfluenceService.getService(account.url,
-				account.user, account.password);
-		final ServerAdapter adapter = new ServerAdapter(account.user + "@"
-				+ account.url, service);
+	private ServerAdapter addServer(AccountDetails account) throws LoginFailureException {
+		ConfluenceService service = ConfluenceService.getService(account.url, account.user, account.password);
+		final ServerAdapter adapter = new ServerAdapter(account.user + "@" + account.url, service);
 		adapterToAccountDetails.put(adapter, account);
 		serverAdapters.add(adapter);
 		return adapter;
 	}
-		public void refresh() {
+	public void refresh() {
 		for (Iterator iter = serverAdapters.iterator(); iter.hasNext();) {
 			final ServerAdapter adapter = (ServerAdapter) iter.next();
 			loadServerData(adapter);
 		}
 	}
-	
-	public int getServerCount(){
+	public int getServerCount() {
 		return serverAdapters.size();
 	}
 	/**
@@ -145,7 +131,7 @@ public class TimTamModel {
 						adapter.loadSpaces(monitor);
 					}
 				};
-				GUIUtil.runOperationWithProgress(op,null);
+				GUIUtil.runOperationWithProgress(op, null);
 			}
 		});
 	}
@@ -166,17 +152,15 @@ public class TimTamModel {
 	 */
 	public void startup() {
 		File accountsFile = TimTamPlugin.getInstance().getStateLocation().append("accounts.xml").toFile();
-		if(!accountsFile.exists()){
-			TimTamPlugin.trace("no accounts found at : "+accountsFile.getAbsolutePath());
+		if (!accountsFile.exists()) {
+			TimTamPlugin.trace("no accounts found at : " + accountsFile.getAbsolutePath());
 			return;
 		}
-		
 		String accountDetailsAsXML = "";
 		try {
 			accountDetailsAsXML = IOUtil.toString(new FileReader(accountsFile));
 		} catch (Exception e) {
-			TimTamPlugin.getInstance()
-					.logException("faild loading accounts", e);
+			TimTamPlugin.getInstance().logException("faild loading accounts", e);
 		}
 		if (accountDetailsAsXML.length() > 0) {
 			XStream xstream = new XStream();
@@ -197,8 +181,7 @@ public class TimTamModel {
 	public void shutdown() {
 		XStream xstream = new XStream();
 		String accountDetailsAsXML = xstream.toXML(accountDetails);
-		File accountsFile = plugin.getStateLocation().append("accounts.xml")
-				.toFile();
+		File accountsFile = plugin.getStateLocation().append("accounts.xml").toFile();
 		FileWriter writer;
 		try {
 			writer = new FileWriter(accountsFile);
@@ -212,12 +195,12 @@ public class TimTamModel {
 	 * @param adapter
 	 */
 	public void refresh(final TreeAdapter adapter) {
-		IRunnableWithProgress op  = new IRunnableWithProgress() {
+		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) {
 				adapter.refresh(monitor);
 			}
 		};
-		GUIUtil.runOperationWithProgress(op,null);
+		GUIUtil.runOperationWithProgress(op, null);
 	}
 	/**
 	 * @param adapter
@@ -226,9 +209,18 @@ public class TimTamModel {
 		serverAdapters.remove(adapter);
 		accountDetails.remove(adapterToAccountDetails.get(adapter));
 	}
+
+	
+	public boolean transferPages(TreeAdapter targetAdapter, Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
+		PageContainer container = (PageContainer) targetAdapter;
+		try {
+			container.transferPages(pagesToCopy, move, monitor);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }
-
-
 class TimTamLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		TreeAdapter adapter = (TreeAdapter) element;
