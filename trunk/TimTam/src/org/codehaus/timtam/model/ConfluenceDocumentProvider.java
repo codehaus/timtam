@@ -70,7 +70,8 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 	 * @see org.eclipse.ui.texteditor.IDocumentProviderExtension#isModifiable(java.lang.Object)
 	 */
 	public boolean isModifiable(Object element) {
-		return true;
+		ConfluencePage page = (ConfluencePage) element;
+		return !page.readOnly();
 	}
 
 	/*

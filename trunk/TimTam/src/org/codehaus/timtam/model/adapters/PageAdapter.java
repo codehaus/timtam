@@ -39,7 +39,6 @@
 
 package org.codehaus.timtam.model.adapters;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +49,7 @@ import org.codehaus.timtam.model.ConfluenceService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
@@ -60,16 +60,13 @@ import com.atlassian.confluence.remote.RemotePageSummary;
  * @author zohar melamed
  *  
  */
-public class PageAdapter extends TreeAdapter implements IEditorInput, ConfluencePage {
-
-	private static Image pageIcon;
-	private static Image homePageIcon;
-	private static ImageDescriptor pageIconDescriptor;
+public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
+	private PageContainer conatiner;
 	private RemotePageSummary pageSummary;
 	private PageAdapter parent;
-	private boolean spaceHome;
 	private RemotePage page;
 	private boolean dirty;
+	private boolean homePage;
 	private ConfluenceService service;
 	private SpaceAdapter space;
 	/**
@@ -80,30 +77,26 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 		SpaceAdapter spaceAdapter,
 		PageAdapter parentPage,
 		ConfluenceService service) {
+		
 		space = spaceAdapter;
 		parent = parentPage;
-
+		homePage = (pageSummary.id == spaceAdapter.getHomepageId()); 
+		
+		conatiner = new PageContainer(service,spaceAdapter,this);
+		
 		this.pageSummary = pageSummary;
 		this.service = service;
-		spaceHome = space.getHomepageId() == pageSummary.id;
-
-		if (pageIcon == null) {
-			pageIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_PAGE);
-			homePageIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_SPACEHOME);
-			pageIconDescriptor = TimTamPlugin.getInstance().loadImageDescriptor(TimTamPlugin.IMG_PAGE);
-		}
 
 		List childPages = space.getChildren(pageSummary.id);
-		children = new Object[childPages.size()];
-		int i = 0;
 		for (Iterator iter = childPages.iterator(); iter.hasNext();) {
 			RemotePageSummary summary = (RemotePageSummary) iter.next();
-			children[i] = new PageAdapter(summary, space, this, service);
-			++i;
+			conatiner.addPage(summary);
 		}
 	}
+
+	
 	public Image getImage() {
-		return spaceHome ? homePageIcon : pageIcon;
+		return TimTamPlugin.getInstance().getPageIcon(this);
 	}
 
 	public Object getParent() {
@@ -126,11 +119,16 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		return pageIconDescriptor;
+		final Image image = TimTamPlugin.getInstance().getPageIcon(this);
+		return new ImageDescriptor(){
+			public ImageData getImageData() {
+				return image.getImageData();
+			}
+		};
 	}
 
 	public String getName() {
-		return getPage().title;
+		return pageSummary.title;
 	}
 
 	public IPersistableElement getPersistable() {
@@ -181,7 +179,7 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 	}
 
 	public boolean isHomePage() {
-		return getPage().homePage;
+		return homePage;
 	}
 
 	public void save() {
@@ -207,7 +205,7 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 	}
 
 	public String getTitle() {
-		return getPage().title;
+		return getName();
 	}
 
 	public void setTitle(String title) {
@@ -235,29 +233,13 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 		return service.renderContent(myPage.space, myPage.id, myPage.content);
 	}
 
-	public Object createChild(String name) {
-		RemotePage newPage = new RemotePage();
-		newPage.content = newPageContent();
-		newPage.space = getPage().space;
-		newPage.title = name;
-		newPage.parentId = getPage().id;
-		newPage = service.storePage(newPage);
-
-		Object temp[] = new Object[children.length + 1];
-		System.arraycopy(children, 0, temp, 0, children.length);
-		PageAdapter pageAdapter = new PageAdapter(newPage, space, this, service);
-		temp[children.length] = pageAdapter;
-		children = temp;
-
-		return pageAdapter;
+	public String renderContent(String content) {
+		RemotePage myPage = getPage();
+		return service.renderContent(myPage.space, myPage.id, content);
 	}
 
-	private String newPageContent() {
-		return "Created by [~"
-			+ service.getUser()
-			+ "]\\\\On "
-			+ Calendar.getInstance().getTime()
-			+ "\\\\Using {color:blue}TimTam{color}";
+	public Object createChild(String name) {
+		return conatiner.createPage(name);
 	}
 
 	public Integer getType() {
@@ -270,7 +252,7 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 	}
 
 	public void rename(String name) {
-		String oldName = page.title;
+		String oldName = pageSummary.title;
 		try {
 			page.title = name;
 			page = service.storePage(page);
@@ -281,34 +263,30 @@ public class PageAdapter extends TreeAdapter implements IEditorInput, Confluence
 	}
 
 	public void delete() {
+		// del bottom up
+		conatiner.deleteAll();
 		service.deletePage(getPage().id);
 		if (parent != null) {
 			parent.removeChild(this);
 		} else {
 			space.removePage(this);
 		}
-		// recurse 
-		for (int i = 0; i < children.length; i++) {
-			PageAdapter child = (PageAdapter) children[i];
-			child.delete();
-		}
-	}
-	/**
-	 * @param adapter
-	 */
-	private void removeChild(PageAdapter adapter) {
-		Object temp[] = new Object[children.length - 1];
-		int ti = 0;
-		for (int i = 0; i < children.length; i++) {
-			PageAdapter pageAdapter = (PageAdapter) children[i];
-			if (pageAdapter != adapter) {
-				temp[ti++] = pageAdapter;
-			}
-			children[i] = null;
-		}
-
-		children = temp;
 	}
 	
+	private void removeChild(PageAdapter adapter) {
+		conatiner.removePage(adapter);
+	}
+
+	public boolean readOnly() {
+		return space.isReadOnly();
+	}
+
+	public Object[] getChildren() {
+		return conatiner.getChildren();
+	}
+
+	public boolean hasChildren() {
+		return conatiner.hasChildren();
+	}
 }
 

@@ -43,5 +43,7 @@ package org.codehaus.timtam.model;
  *
  */
 public interface ConfluenceSpace {
-	Object addPage(String name);
+	public Object createPage(String name);
+	public boolean isReadOnly();
+	public boolean isLoaded();
 }

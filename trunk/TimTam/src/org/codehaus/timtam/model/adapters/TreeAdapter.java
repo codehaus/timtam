@@ -45,27 +45,19 @@ import org.eclipse.swt.graphics.Image;
  * @author zohar melamed
  *  
  */
-public abstract class TreeAdapter {
+public interface TreeAdapter {
 	public static final Integer PAGE = new Integer(0);
 	public static final Integer SPACE = new Integer(1);
 	public static final Integer SERVER = new Integer(2);
 	
-	protected Object[] EMPTY_ARRAY = new Object[0];
-	protected Object[] children;
-	public Object[] getChildren() {
-		return children != null ? children : EMPTY_ARRAY;
-	}
+	public Object[] getChildren() ;
 
-	public boolean hasChildren() {
-		return (children != null && children.length > 0);
-	}
-
+	public boolean hasChildren();
 	public abstract Object getParent();
 	public abstract Image getImage();
 	public abstract String getText();
 
 	public abstract Integer getType();
 	public abstract void refresh(IProgressMonitor monitor);
-
 	
 }

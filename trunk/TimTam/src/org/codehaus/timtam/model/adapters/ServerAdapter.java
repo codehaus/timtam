@@ -38,6 +38,9 @@
 */
 package org.codehaus.timtam.model.adapters;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceService;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,10 +52,11 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  * @author zohar melamed
  *
  */
-public class ServerAdapter extends TreeAdapter {
+public class ServerAdapter implements TreeAdapter {
 	private String name;
 	private static Image icon;
 	private ConfluenceService service;
+	private Collection spaces = new ArrayList(); 
 
 	public ServerAdapter(String name, ConfluenceService service) {
 		this.service = service;
@@ -63,23 +67,23 @@ public class ServerAdapter extends TreeAdapter {
 	}
 
 	public void refresh(IProgressMonitor monitor) {
-		RemoteSpaceSummary[] spaces = null;
+		RemoteSpaceSummary[] spaceSummaries = null;
 		try {
 			monitor.setTaskName("Retreiving Space Summaries...");
-			spaces = service.getSpaces();
-			monitor.beginTask("Loading "+spaces.length+" Spaces",spaces.length);
+			spaceSummaries = service.getSpaces();
+			spaces.clear();
+			monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
 		} catch (Exception e) {
 			TimTamPlugin.getInstance().logException("failed to get spaces", e);
 			return;
 		}
 
-		children = new Object[spaces.length];
-		for (int i = 0; i < spaces.length; i++) {
-			RemoteSpaceSummary summary = spaces[i];
+		for (int i = 0; i < spaceSummaries.length; i++) {
+			RemoteSpaceSummary summary = spaceSummaries[i];
 			SpaceAdapter adapter = new SpaceAdapter(summary, this,service);
 			adapter.refresh(monitor);
 			monitor.internalWorked(1);
-			children[i] = adapter;
+			spaces.add(adapter);
 		}
 		monitor.done();
 	}
@@ -97,5 +101,13 @@ public class ServerAdapter extends TreeAdapter {
 	}
 	public Integer  getType() {
 		return SERVER;
+	}
+
+	public Object[] getChildren() {
+		return spaces.toArray();
+	}
+
+	public boolean hasChildren() {
+		return !spaces.isEmpty();
 	}
 }

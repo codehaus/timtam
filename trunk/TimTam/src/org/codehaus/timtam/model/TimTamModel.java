@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.io.IOUtil;
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.adapters.ServerAdapter;
@@ -59,7 +60,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+
 import com.thoughtworks.xstream.XStream;
+
 /**
  * @author zohar melamed
  *  
@@ -90,12 +93,13 @@ class AccountDetails {
 }
 public class TimTamModel {
 	private TimTamContentProvider contentProvider = new TimTamContentProvider();
-	private TimTamLabelProvider labelProvider = new TimTamLabelProvider();
+	private LabelProvider labelProvider = new TimTamLabelProvider();
 	private static TimTamModel instance = new TimTamModel();
 	protected List serverAdapters = new ArrayList();
 	protected List accountDetails = new ArrayList();
 	Map adapterToAccountDetails = new HashMap();
 	final TimTamPlugin plugin = TimTamPlugin.getInstance();
+	
 	private TimTamModel() {
 	}
 	/**
@@ -106,9 +110,10 @@ public class TimTamModel {
 	public void addServer(String server, String user, String password)
 			throws LoginFailureException {
 		AccountDetails details = new AccountDetails(server, user, password);
-		accountDetails.add(details);
 		loadServerData(addServer(details));
+		accountDetails.add(details);
 	}
+
 	private ServerAdapter addServer(AccountDetails account)
 			throws LoginFailureException {
 		ConfluenceService service = ConfluenceService.getService(account.url,
@@ -119,11 +124,15 @@ public class TimTamModel {
 		serverAdapters.add(adapter);
 		return adapter;
 	}
-	public void refresh() {
+		public void refresh() {
 		for (Iterator iter = serverAdapters.iterator(); iter.hasNext();) {
 			final ServerAdapter adapter = (ServerAdapter) iter.next();
 			loadServerData(adapter);
 		}
+	}
+	
+	public int getServerCount(){
+		return serverAdapters.size();
 	}
 	/**
 	 * @param adapter
@@ -227,6 +236,8 @@ public class TimTamModel {
 		accountDetails.remove(adapterToAccountDetails.get(adapter));
 	}
 }
+
+
 class TimTamLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		TreeAdapter adapter = (TreeAdapter) element;

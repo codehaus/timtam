@@ -67,6 +67,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -79,6 +80,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -186,7 +188,8 @@ public class ConfluenceView extends ViewPart {
 		refreshNode.setText("Refresh");
 		refreshNode.setToolTipText("Refresh The Data For The Selected Item");
 		refreshNode.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_REFRESH_NODE));
-
+		refreshNode.setEnabled(model.getServerCount() > 0);
+		
 		addServer = new Action() {
 			public void run() {
 				NewServerConnectionWizard wizard = new NewServerConnectionWizard();
@@ -195,8 +198,10 @@ public class ConfluenceView extends ViewPart {
 				WizardDialog dialog = new WizardDialog(getViewSite().getShell(), wizard);
 				dialog.create();
 				dialog.setTitle("Add New Confluence Server Connection");
-				dialog.open();
-				viewer.setInput(model);
+				if(dialog.open() == SWT.OK){
+					viewer.setInput(model);
+					refreshNode.setEnabled(model.getServerCount() > 0);
+				}
 			}
 			
 		};
@@ -231,6 +236,7 @@ public class ConfluenceView extends ViewPart {
 		return selectedNodes;
 	}
 
+	 
 	private List makePageActions() {
 		List actionList = new ArrayList();
 
@@ -312,6 +318,8 @@ public class ConfluenceView extends ViewPart {
 			}
 			viewer.refresh();
 		}
+		
+		refreshNode.setEnabled(model.getServerCount() > 0);
 	}
 
 	private List makeSpaceActions() {
@@ -339,7 +347,7 @@ public class ConfluenceView extends ViewPart {
 		InputDialog dialog =
 			new InputDialog(getSite().getShell(), "New Page Name ?", "Enter New Page Name", null, null);
 		if (dialog.open() == Window.OK) {
-			Object newPage = space.addPage(dialog.getValue());
+			Object newPage = space.createPage(dialog.getValue());
 			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(new Object[] { newPage }), true);
 			openEditor(newPage);
@@ -354,7 +362,13 @@ public class ConfluenceView extends ViewPart {
 		InputDialog dialog =
 			new InputDialog(getSite().getShell(), "New Name ?", "Enter New Name", page.getTitle(), null);
 		if (dialog.open() == Window.OK) {
-			page.rename(dialog.getValue());
+			try{
+				page.rename(dialog.getValue());
+			}catch(Exception e){
+				MessageDialog.openError(null, "Rename Page Fail", "Failed to Rename Page , See Erorr  Log For Details");
+				plugin.logException("failed deleteing pages", e);
+				
+			}
 			viewer.refresh();
 		}
 	}
@@ -379,13 +393,13 @@ public class ConfluenceView extends ViewPart {
 	 */
 	protected void deletePage() {
 		final TreeAdapter[] adapters = getSelectedNodes();
-
+		int totalPageCount  = totalPageCount(adapters);	
 		Shell shell = getSite().getShell();
 		if (!MessageDialog
 			.openQuestion(
 				shell,
-				"Confirm Delete Pages",
-				"Delete " + adapters.length + " Selected Pages And All Child Pages?")) {
+				"Delete Pages?",
+				"Delete " + totalPageCount+ " Selected Page"+(totalPageCount>1?"s":""))) {
 			return;
 		}
 
@@ -393,7 +407,10 @@ public class ConfluenceView extends ViewPart {
 			new ProgressMonitorDialog(shell).run(false, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) {
 					monitor.beginTask("Deleting Pages...", adapters.length);
+					IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+					ITreeContentProvider provider = model.getContentProvider();
 					for (int i = 0; i < adapters.length; i++) {
+						closeAllEditors(workbenchPage,provider,adapters[i]);
 						ConfluencePage page = (ConfluencePage) adapters[i];
 						monitor.setTaskName("Deleting " + page.getTitle());
 						page.delete();
@@ -402,12 +419,58 @@ public class ConfluenceView extends ViewPart {
 					viewer.refresh();
 				}
 
+				private void closeAllEditors(IWorkbenchPage workbenchPage, ITreeContentProvider provider, Object node) {
+					IEditorPart part = workbenchPage.findEditor((IEditorInput) node);
+					if(part != null){
+						workbenchPage.closeEditor(part,true);
+					}
+					
+					if(provider.hasChildren(node)){
+						Object[] nodes = provider.getChildren(node);
+						for (int i = 0; i < nodes.length; i++) {
+							closeAllEditors(workbenchPage, provider, nodes[i]);
+						}
+					}
+				}
 			});
+			
 		} catch (Exception e) {
 			MessageDialog.openError(shell, "Delete Pages Fail", "Failed to Delete Pages , See Erorr  Log For Details");
 			plugin.logException("failed deleteing pages", e);
 		}
 
+	}
+
+	/**
+	 * @param adapters
+	 * @return
+	 */
+	private int totalPageCount(TreeAdapter[] adapters) {
+		ITreeContentProvider provider = model.getContentProvider();
+		int total = 0;
+		for (int i = 0; i < adapters.length; i++) {
+			TreeAdapter adapter = adapters[i];
+			total += countNodes(provider,adapter);
+		}
+		return total;
+	}
+
+	/**
+	 * @param provider
+	 * @param adapter
+	 * @return
+	 */
+	private int countNodes(ITreeContentProvider provider, Object node) {
+		int count = 1;
+		if(provider.hasChildren(node)){
+			Object[] nodes = provider.getChildren(node);
+			for (int i = 0; i < nodes.length; i++) {
+				count += countNodes(provider,nodes[i]);
+			}
+			return count;
+		}
+		
+		return 1;
 	}
 
 	protected void openPage() {
