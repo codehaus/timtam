@@ -52,7 +52,7 @@ import org.eclipse.swt.graphics.Image;
  */
 public class ConfluenceCompletionProcessor extends TemplateCompletionProcessor{
 
-	//private char[] completionChars = new char[]{'{','['};
+	private char[] completionChars = new char[]{'{'};
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getTemplates(java.lang.String)
 	 */
@@ -67,6 +67,12 @@ public class ConfluenceCompletionProcessor extends TemplateCompletionProcessor{
 		return TimTamPlugin.getInstance().getCompletionProcessorImage();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
+	 */
+	public char[] getCompletionProposalAutoActivationCharacters() {
+		return completionChars;
+	}
 
 
 	/* (non-Javadoc)
