@@ -151,4 +151,11 @@ public class ServerAdapter implements TreeAdapter {
 		}
 		return results;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.adapters.TreeAdapter#getUrl()
+	 */
+	public String getUrl() {
+		return serverUrl;
+	}
 }

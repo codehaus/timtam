@@ -60,6 +60,7 @@ public interface TreeAdapter {
 	public abstract String getText();
 
 	public abstract Integer getType();
+	public abstract String getUrl();
 	public abstract void refresh(IProgressMonitor monitor) throws RemoteException;
 	
 }
