@@ -43,8 +43,11 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -59,10 +62,12 @@ public class ServerDetailsPage extends WizardPage {
 	protected String server = "http://wiki.london.echonet";
 	protected String user = "melamedz";
 	protected String password = "trustno1";
-	Text serverText;
-	Text userText;
-	Text passwordText;
-
+	protected boolean useProxy = false;
+	
+	private Text serverText;
+	private Text userText;
+	private Text passwordText;
+	private Button useProxyCheck;
 	/**
 	 * @param pageName
 	 */
@@ -80,16 +85,17 @@ public class ServerDetailsPage extends WizardPage {
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
-		container.setLayout(layout);
 		layout.numColumns = 2;
 		layout.verticalSpacing = 9;
+		container.setLayout(layout);
+		
 		Label label = new Label(container, SWT.NULL);
 		label.setText("&Server Url:");
-
 		serverText = new Text(container, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		serverText.setLayoutData(gd);
 		serverText.setText(server);
+		
 		serverText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				server = serverText.getText(); 
@@ -120,6 +126,14 @@ public class ServerDetailsPage extends WizardPage {
 			public void modifyText(ModifyEvent e) {
 				password= passwordText.getText();
 				dialogChanged();
+			}
+		});
+	
+		useProxyCheck = new Button(container, SWT.CHECK | SWT.LEFT);
+		useProxyCheck.setText("Use Proxy ?");
+		useProxyCheck.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				useProxy = useProxyCheck.getSelection();
 			}
 		});
 		

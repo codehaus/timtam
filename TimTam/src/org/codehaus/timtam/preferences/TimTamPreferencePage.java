@@ -63,7 +63,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class TimTamPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private BooleanFieldEditor useProxy;
 	private StringFieldEditor proxyHost;
 	private StringFieldEditor proxyPort;
 	private StringFieldEditor proxyUser;
@@ -88,20 +87,21 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	public void createFieldEditors() {
 		
 		Composite editorParent = getFieldEditorParent();
-		useProxy = new BooleanFieldEditor(TimTamPlugin.P_USE_PROXY, "Use Proxy Server ? ", editorParent);
-		useProxy.setPreferenceName("TimTamPlugin.P_USE_PROXY");
-		addField(useProxy);
+		
 		proxyHost = new StringFieldEditor(TimTamPlugin.P_PROXY_HOST, "Proxy Host", editorParent);
 		addField(proxyHost);
+		
 		proxyPort = new StringFieldEditor(TimTamPlugin.P_PROXY_PORT, "Proxy Port", editorParent);
 		addField(proxyPort);
+		
 		proxyUser = new StringFieldEditor(TimTamPlugin.P_PROXY_USER, "Proxy User Name", editorParent);
 		addField(proxyUser);
+		
 		proxyPasssword = new StringFieldEditor(TimTamPlugin.P_PROXY_PASSWORD, "Proxy Password", editorParent);
 		proxyPasssword.getTextControl(editorParent).setEchoChar('*');
 		addField(proxyPasssword);
 		
-		setProxyFieldsState(editorParent);
+
 		
 		useHttpAuth = new BooleanFieldEditor(TimTamPlugin.P_USE_HTTP_AUTH, "Use HTTP Authentication?  ", editorParent);
 		addField(useHttpAuth);
@@ -113,23 +113,18 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 		httpPassword.getTextControl(editorParent).setEchoChar('*');
 		addField(httpPassword);
 		
-		setHttpFieldsState(editorParent);
 	}
 
-	public void init(IWorkbench workbench) {
+	protected void initialize() {
+	    super.initialize();
+		setHttpFieldsState(getFieldEditorParent());
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
-		Object source = event.getSource();
-		Composite editorParent = getFieldEditorParent();
-		if(source == useProxy){
-			setProxyFieldsState(editorParent);
-		}else if(source == useHttpAuth || source == useProxySettings){
-			setHttpFieldsState(editorParent);
-		}
+		setHttpFieldsState(getFieldEditorParent());
 	}
 
 	/**
@@ -146,12 +141,12 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	/**
 	 * @param editorParent
 	 */
-	private void setProxyFieldsState(Composite editorParent) {
-		boolean enabled = useProxy.getBooleanValue();
-		proxyHost.setEnabled(enabled,editorParent);
-		proxyPasssword.setEnabled(enabled,editorParent);
-		proxyPort.setEnabled(enabled,editorParent);
-		proxyUser.setEnabled(enabled,editorParent);
-	}
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+     */
+    public void init(IWorkbench workbench) {
+        
+    }
 	
 }
