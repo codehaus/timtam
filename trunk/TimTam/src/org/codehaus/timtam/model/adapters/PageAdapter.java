@@ -274,10 +274,12 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	public void rename(String name) throws NotPermittedException, RemoteException {
 		String oldName = pageSummary.title;
 		try {
-			page.title = name;
+			getPage().title = name;
+			pageSummary.title = name;
 			page = service.storePage(page);
 		} catch (RuntimeException e) {
 			page.title = oldName;
+			pageSummary.title = oldName;
 			throw e;
 		}
 	}
