@@ -38,6 +38,8 @@
 */
 package org.codehaus.timtam.model;
 
+import com.atlassian.confluence.remote.RemotePageHistory;
+
 /**
  * @author MelamedZ
  *
@@ -66,6 +68,7 @@ public interface ConfluencePage {
 	public java.util.Date getModified();
 	public String getModifier();
 	public int getVersion();
+	public RemotePageHistory[] getPageHistory();
 	
 	
 	public void save();
@@ -77,6 +80,7 @@ public interface ConfluencePage {
 	public boolean isDirty();
 	public void delete();
 	public boolean isReadOnly();
+
 
 	
 }

@@ -78,7 +78,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 	/** The text editor for the conf page */
 	protected ConflunceMarkupEditor editor;
 	private BrowserControl browser;
-
+	public static final String EDITOR_ID = "org.codehaus.timtam.editors.TimTamPageEditor";
 	//private RemotePage page;
 
 	private int previewPageIndex = -1;
@@ -220,4 +220,15 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 		needsRendering = true;
 	}
 
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if(adapter == IEditorInput.class){
+			return getEditorInput();
+		}
+		
+		return super.getAdapter(adapter);
+	}
 }

@@ -43,9 +43,11 @@ import java.util.Collection;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceService;
+import org.codehaus.timtam.model.SearchResult;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
+import com.atlassian.confluence.remote.RemoteSearchResult;
 import com.atlassian.confluence.remote.RemoteSpaceSummary;
 
 /**
@@ -53,14 +55,16 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  *
  */
 public class ServerAdapter implements TreeAdapter {
-	private String name;
 	private static Image icon;
 	private ConfluenceService service;
-	private Collection spaces = new ArrayList(); 
+	private Collection spaces = new ArrayList();
+	private String serverUrl;
+	private String userName; 
 
-	public ServerAdapter(String name, ConfluenceService service) {
+	public ServerAdapter(String serverUrl,String userName, ConfluenceService service) {
+		this.serverUrl = serverUrl;
+		this.userName = userName;
 		this.service = service;
-		this.name = name;
 		if (icon == null) {
 			icon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_SERVER);
 		}
@@ -109,7 +113,7 @@ public class ServerAdapter implements TreeAdapter {
 		}
 		monitor.done();
 	}
-
+	
 	public Object getParent() {
 		return null;
 	}
@@ -119,7 +123,7 @@ public class ServerAdapter implements TreeAdapter {
 	}
 
 	public String getText() {
-		return name;
+		return userName+"@"+serverUrl;
 	}
 	public Integer  getType() {
 		return SERVER;
@@ -131,5 +135,18 @@ public class ServerAdapter implements TreeAdapter {
 
 	public boolean hasChildren() {
 		return !spaces.isEmpty();
+	}
+
+	/**
+	 * @param searchTerm
+	 */
+	public SearchResult[] search(String query) {
+		RemoteSearchResult[] remoteResults = service.search(query,100);
+		SearchResult[] results = new SearchResult[remoteResults.length];
+		for (int i = 0; i < results.length; i++) {
+			results[i] = new SearchResult(serverUrl,remoteResults[i]);
+			
+		}
+		return results;
 	}
 }

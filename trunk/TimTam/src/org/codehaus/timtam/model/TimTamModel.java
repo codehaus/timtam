@@ -37,6 +37,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -106,7 +108,7 @@ public class TimTamModel {
 	}
 	private ServerAdapter addServer(AccountDetails account) throws LoginFailureException {
 		ConfluenceService service = ConfluenceService.getService(account.url, account.user, account.password);
-		final ServerAdapter adapter = new ServerAdapter(account.user + "@" + account.url, service);
+		final ServerAdapter adapter = new ServerAdapter(account.url, account.user , service);
 		adapterToAccountDetails.put(adapter, account);
 		serverAdapters.add(adapter);
 		return adapter;
@@ -219,6 +221,20 @@ public class TimTamModel {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	/**
+	 * @param string
+	 */
+	public Collection search(String query) {
+		// run search on all servers and agg results
+		ArrayList result = new ArrayList();
+		for (Iterator adapter = serverAdapters.iterator(); adapter.hasNext();) {
+			ServerAdapter server = (ServerAdapter) adapter.next();
+			SearchResult[] results = server.search(query);
+			result.addAll(Arrays.asList(results));
+		}
+		
+		return result;
 	}
 }
 class TimTamLabelProvider extends LabelProvider {

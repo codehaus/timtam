@@ -44,6 +44,10 @@ package org.codehaus.timtam.model;
  */
 public interface ConfluenceSpace {
 	public Object createPage(String name);
+	public String getName();
+	public String getDescription();
+	public String getUrl();
+	public String getKey();
 	public boolean isReadOnly();
 	public boolean isHealty();
 }

@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.editors.SpaceEditor;
+import org.codehaus.timtam.editors.TimTamPageEditor;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.codehaus.timtam.model.ConfluenceSpace;
 import org.codehaus.timtam.model.TimTamModel;
@@ -71,11 +73,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -117,10 +120,10 @@ public class ConfluenceView extends ViewPart {
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
-//		D&D support on ice pending bug fixes in conf - CONF-1091  
-//		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
-//		viewer.addDragSupport(DND.DROP_MOVE , transfers, new ConfluenceDragListner(this));
-//		viewer.addDropSupport(DND.DROP_MOVE , transfers, new ConfluenceDropAdapter(this));
+  
+		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
+		viewer.addDragSupport(DND.DROP_MOVE , transfers, new ConfluenceDragListner(this));
+		viewer.addDropSupport(DND.DROP_MOVE , transfers, new ConfluenceDropAdapter(this));
 	}
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -309,7 +312,7 @@ public class ConfluenceView extends ViewPart {
 			Object newPage = space.createPage(dialog.getValue());
 			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(new Object[]{newPage}), true);
-			openEditor(newPage);
+			openEditor(newPage, TimTamPageEditor.EDITOR_ID);
 		}
 	}
 	/**
@@ -339,7 +342,7 @@ public class ConfluenceView extends ViewPart {
 			Object child = page.createPage(dialog.getValue());
 			viewer.refresh();
 			viewer.setSelection(new StructuredSelection(new Object[]{child}), true);
-			openEditor(child);
+			openEditor(child, TimTamPageEditor.EDITOR_ID);
 		}
 	}
 	/**
@@ -418,19 +421,17 @@ public class ConfluenceView extends ViewPart {
 	protected void openPage() {
 		TreeAdapter[] adapters = getSelectedNodes();
 		for (int i = 0; i < adapters.length; i++) {
-			openEditor(adapters[i]);
+			openEditor(adapters[i], TimTamPageEditor.EDITOR_ID);
 		}
 	}
 	/**
 	 * @param obj
 	 */
-	protected void openEditor(Object obj) {
+	protected void openEditor(Object obj, String editorId) {
 		try {
-			IEditorDescriptor descriptor = PlatformUI.getWorkbench().getEditorRegistry().findEditor(
-					"org.codehaus.timtam.editors.TimTamPageEditor");
 			IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			workbenchPage.setEditorAreaVisible(true);
-			workbenchPage.openEditor((IEditorInput) obj, descriptor.getId());
+			workbenchPage.openEditor((IEditorInput) obj, editorId);
 		} catch (WorkbenchException e) {
 			plugin.logException("failed to open an editor", e);
 		}
@@ -450,15 +451,15 @@ public class ConfluenceView extends ViewPart {
 					viewer.setInput(model);
 					viewer.expandToLevel(2);
 				} else if (type.equals(TreeAdapter.SPACE)) {
-					openSpaceInfo(adapter);
+					openSpace(adapter);
 				} else if (type.equals(TreeAdapter.PAGE)) {
 					openPage();
 				}
 			}
 		});
 	}
-	protected void openSpaceInfo(TreeAdapter adapter) {
-		adapter.getType();
+	protected void openSpace(TreeAdapter adapter) {
+		openEditor(adapter, SpaceEditor.EDITOR_ID);
 	}
 	/**
 	 * Passing the focus request to the viewer's control.

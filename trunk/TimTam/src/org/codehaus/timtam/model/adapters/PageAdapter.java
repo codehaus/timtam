@@ -55,6 +55,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 import com.atlassian.confluence.remote.RemotePage;
+import com.atlassian.confluence.remote.RemotePageHistory;
 import com.atlassian.confluence.remote.RemotePageSummary;
 
 /**
@@ -70,6 +71,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	private boolean homePage;
 	private ConfluenceService service;
 	SpaceAdapter space;
+	private RemotePageHistory[] history;
 	
 	
 	/**
@@ -139,7 +141,11 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	}
 
 	public String getToolTipText() {
-		return getPage().title;
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(getTitle()).append("\nVersion : ").append(getVersion());
+		buffer.append("\nLast modified by ").append(getModifier()).append(" - On ").append(getModified());
+		buffer.append("\nCreated by ").append(getCreator()).append(" On ").append(getCreated());
+		return buffer.toString();
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -188,12 +194,14 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	public void save() {
 		page = service.storePage(page);
 		pageSummary = page;
+		history = null;
 		dirty = false;
 	}
 
 	public void refresh() {
 		page = null;
 		dirty = false;
+		history = null;
 	}
 
 	public void setContent(String content) {
@@ -306,6 +314,17 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	 */
 	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
 		childPages.transferPages(pagesToCopy, move, monitor);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.ConfluencePage#getPageHistory()
+	 */
+	public RemotePageHistory[] getPageHistory() {
+		if(history == null){
+			history  = service.getPageHistory(getId());
+		}
+		return history;
 	}
 	
 
