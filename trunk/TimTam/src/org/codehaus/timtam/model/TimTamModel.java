@@ -68,16 +68,21 @@ class AccountDetails {
 	String url;
 	String user;
 	String password;
+	boolean useProxy;
+	
 	/**
 	 * @param url
 	 * @param user
 	 * @param password
+	 * @param useProxy
 	 */
-	public AccountDetails(String url, String user, String password) {
+	public AccountDetails(String url, String user, String password, boolean useProxy) {
 		this.url = url;
 		this.user = user;
 		this.password = password;
+        this.useProxy = useProxy;
 	}
+	
 	public boolean equals(Object that) {
 		if (this == that)
 			return true;
@@ -101,14 +106,15 @@ public class TimTamModel {
 	 * @param server
 	 * @param user
 	 * @param password
+	 * @param useProxy
 	 */
-	public void addServer(String server, String user, String password) throws LoginFailureException {
-		AccountDetails details = new AccountDetails(server, user, password);
+	public void addServer(String server, String user, String password, boolean useProxy) throws LoginFailureException {
+		AccountDetails details = new AccountDetails(server, user, password, useProxy);
 		loadServerData(addServer(details));
 		accountDetails.add(details);
 	}
 	private ServerAdapter addServer(AccountDetails account) throws LoginFailureException {
-		ConfluenceService service = ConfluenceService.getService(account.url, account.user, account.password);
+		ConfluenceService service = ConfluenceService.getService(account.url, account.user, account.password,account.useProxy);
 		final ServerAdapter adapter = new ServerAdapter(account.url, account.user , service);
 		adapterToAccountDetails.put(adapter, account);
 		serverAdapters.add(adapter);
