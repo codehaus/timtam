@@ -31,55 +31,56 @@
  * 
  *  
  */
-package org.codehaus.timtam.views;
+package org.codehaus.timtam.views.confluencetree;
+import org.codehaus.timtam.model.PageContainer;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
-import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 /**
  * @author Zohar
+ *  
  */
-public class ConfluenceDragListner implements DragSourceListener {
-	public static final String TIMTAMD_DND = "TimTamD&D";
+public class ConfluenceDropAdapter extends ViewerDropAdapter {
+	private TreeAdapter targetAdapter;
 	private ConfluenceView view;
+	private int operation;
 	/**
-	 * @param view
+	 * @param viewer
 	 */
-	public ConfluenceDragListner(ConfluenceView view) {
+	protected ConfluenceDropAdapter(ConfluenceView view) {
+		super(view.getViewer());
 		this.view = view;
 	}
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart(org.eclipse.swt.dnd.DragSourceEvent)
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#performDrop(java.lang.Object)
 	 */
-	public void dragStart(DragSourceEvent event) {
-		TreeAdapter[] adapters = view.getSelectedNodes();
-		// we can only dnd pages
-		for (int i = 0; i < adapters.length; i++) {
-			TreeAdapter adapter = adapters[i];
-			if(adapter.getType() != TreeAdapter.PAGE){
-				event.doit  = false;
-			}
+	public boolean performDrop(Object data) {
+		ISelection selection = LocalSelectionTransfer.getInstance().getSelection();
+		return view.doDragAndDrop(targetAdapter, (IStructuredSelection)selection,operation);
+	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object,
+	 *      int, org.eclipse.swt.dnd.TransferData)
+	 */
+	public boolean validateDrop(Object target, int op, TransferData transferType) {
+		if (target == null) {
+			return false;
 		}
-		
-		LocalSelectionTransfer.getInstance().setSelection(view.getSelection());
+
+		targetAdapter = (TreeAdapter) target;
+		operation = op;
+		if (target instanceof PageContainer) {
+			// we can only drop page[s] into a read enabled space/page ( a pagecontainer )
+			PageContainer pageContainer = (PageContainer) target;
+			return !pageContainer.isReadOnly();
+		}
+		return false;
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
-	 */
-	public void dragSetData(DragSourceEvent event) {
-//	if (LocalSelectionTransfer.getInstance().isSupportedType(event.dataType)) {
-//			event.data = view.getSelection();
-//		}
-	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
-	 */
-	public void dragFinished(DragSourceEvent event) {
-	}
-}
+ }

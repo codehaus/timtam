@@ -37,7 +37,7 @@
 *
 */
 
-package org.codehaus.timtam.views;
+package org.codehaus.timtam.views.confluencetree;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;

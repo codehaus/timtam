@@ -7,7 +7,7 @@
 package org.codehaus.timtam.actions;
 
 import org.codehaus.timtam.util.GUIUtil;
-import org.codehaus.timtam.views.ConfluenceView;
+import org.codehaus.timtam.views.confluencetree.ConfluenceView;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;

@@ -40,9 +40,9 @@
 
 package org.codehaus.timtam.perspective;
 
-import org.codehaus.timtam.views.ConfluenceView;
 import org.codehaus.timtam.views.SearchView;
 import org.codehaus.timtam.views.VersionsView;
+import org.codehaus.timtam.views.confluencetree.ConfluenceView;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;

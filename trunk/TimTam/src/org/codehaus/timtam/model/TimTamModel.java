@@ -51,11 +51,6 @@ import org.codehaus.timtam.model.adapters.TreeAdapter;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.atlassian.confluence.remote.RemoteException;
@@ -93,9 +88,7 @@ class AccountDetails {
 	}
 }
 public class TimTamModel {
-	private TimTamContentProvider contentProvider = new TimTamContentProvider();
 	private TimTamServiceFactory serviceFactory;
-	private LabelProvider labelProvider = new TimTamLabelProvider();
 	private static TimTamModel instance = new TimTamModel();
 	protected List serverAdapters = new ArrayList();
 	protected List accountDetails = new ArrayList();
@@ -147,12 +140,7 @@ public class TimTamModel {
 			}
 		});
 	}
-	public ITreeContentProvider getContentProvider() {
-		return contentProvider;
-	}
-	public ILabelProvider getLabelProvider() {
-		return labelProvider;
-	}
+
 	/**
 	 * @return
 	 */
@@ -256,43 +244,5 @@ public class TimTamModel {
 	 */
 	public ServerAdapter[] getServers() {
 		return (ServerAdapter[]) serverAdapters.toArray(new ServerAdapter[serverAdapters.size()]);
-	}
-}
-class TimTamLabelProvider extends LabelProvider {
-	public Image getImage(Object element) {
-		TreeAdapter adapter = (TreeAdapter) element;
-		return adapter.getImage();
-	}
-	public String getText(Object element) {
-		TreeAdapter adapter = (TreeAdapter) element;
-		return adapter.getText();
-	}
-}
-class TimTamContentProvider implements ITreeContentProvider {
-	public Object[] getChildren(Object parentElement) {
-		TreeAdapter adapter = (TreeAdapter) parentElement;
-		return adapter.getChildren();
-	}
-	public Object getParent(Object element) {
-		TreeAdapter adapter = (TreeAdapter) element;
-		return adapter.getParent();
-	}
-	public boolean hasChildren(Object element) {
-		TreeAdapter adapter = (TreeAdapter) element;
-		return adapter.hasChildren();
-	}
-	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof TimTamModel) {
-			TimTamModel root = (TimTamModel) inputElement;
-			return root.serverAdapters.toArray();
-		}
-		TreeAdapter adapter = (TreeAdapter) inputElement;
-		return adapter.getChildren();
-	}
-	public void dispose() {
-		// TODO Auto-generated method stub
-	}
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		//like i care ...
 	}
 }
