@@ -277,7 +277,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter {
 		conatiner.removePage(adapter);
 	}
 
-	public boolean readOnly() {
+	public boolean isReadOnly() {
 		return space.isReadOnly();
 	}
 

@@ -1,45 +1,37 @@
 /*
-*
-* Copyright 2003(c)  Zohar Melamed
-* All rights reserved.
-*
-
- Redistribution and use of this software and associated documentation
- ("Software"), with or without modification, are permitted provided
- that the following conditions are met:
-
- 1. Redistributions of source code must retain copyright
-    statements and notices.  Redistributions must also contain a
-    copy of this document.
-
- 2. Redistributions in binary form must reproduce the
-    above copyright notice, this list of conditions and the
-    following disclaimer in the documentation and/or other
-    materials provided with the distribution.
-
- 3. Due credit should be given to The Codehaus and Contributors
-    http://timtam.codehaus.org/
-
- THIS SOFTWARE IS PROVIDED BY THE CODEHAUS AND CONTRIBUTORS
- ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
- NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
- THE CODEHAUS OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*
-*
-*/
-
-
+ * 
+ * Copyright 2003(c) Zohar Melamed All rights reserved.
+ * 
+ * 
+ * Redistribution and use of this software and associated documentation
+ * ("Software"), with or without modification, are permitted provided that the
+ * following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain copyright statements and
+ * notices. Redistributions must also contain a copy of this document.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * 
+ * 3. Due credit should be given to The Codehaus and Contributors
+ * http://timtam.codehaus.org/
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE CODEHAUS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE CODEHAUS OR ITS CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 
+ *  
+ */
 package org.codehaus.timtam.views;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,6 +44,7 @@ import org.codehaus.timtam.model.ConfluenceSpace;
 import org.codehaus.timtam.model.TimTamModel;
 import org.codehaus.timtam.model.adapters.ServerAdapter;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
+import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -74,6 +67,9 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -87,33 +83,26 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
-
 public class ConfluenceView extends ViewPart {
 	TreeViewer viewer;
 	DrillDownAdapter drillDownAdapter;
 	TimTamModel model = TimTamModel.getInstace();
-	
 	public final static String CONFLUENCE_TREEVIEW_ID = "org.codehaus.timtam.views.ConfluenceView";
-	
 	private Action refreshNode;
 	private Action addServer;
-
 	TimTamPlugin plugin;
 	private Map actionsMap = new HashMap();
-
 	class NameSorter extends ViewerSorter {
 	}
-
 	/**
 	 * The constructor.
 	 */
 	public ConfluenceView() {
 		plugin = TimTamPlugin.getInstance();
 	}
-
 	/**
-	 * This is a callback that will allow us to create the viewer and
-	 * initialize it.
+	 * This is a callback that will allow us to create the viewer and initialize
+	 * it.
 	 */
 	public void createPartControl(Composite parent) {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -126,8 +115,12 @@ public class ConfluenceView extends ViewPart {
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
+		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
+		viewer.addDragSupport(DND.DROP_MOVE, transfers,
+				new ConfluenceDragListner(this));
+		viewer.addDropSupport(DND.DROP_MOVE, transfers,
+				new ConfluenceDropAdapter(viewer));
 	}
-
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
@@ -140,16 +133,15 @@ public class ConfluenceView extends ViewPart {
 		viewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, viewer);
 	}
-
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalToolBar(bars.getToolBarManager());
 	}
-
 	protected void fillContextMenu(IMenuManager manager) {
 		ISelection selection = viewer.getSelection();
 		if (selection != null) {
-			TreeAdapter adapter = (TreeAdapter) ((IStructuredSelection) selection).getFirstElement();
+			TreeAdapter adapter = (TreeAdapter) ((IStructuredSelection) selection)
+					.getFirstElement();
 			List actions = (List) actionsMap.get(adapter.getType());
 			if (actions != null) {
 				for (Iterator iter = actions.iterator(); iter.hasNext();) {
@@ -158,21 +150,18 @@ public class ConfluenceView extends ViewPart {
 				manager.add(new Separator());
 			}
 		}
-
 		manager.add(refreshNode);
 		manager.add(addServer);
 		manager.add(new Separator());
 		drillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshNode);
 		manager.add(addServer);
 		manager.add(new Separator());
 		drillDownAdapter.addNavigationActions(manager);
 	}
-
 	private void makeActions() {
 		// general actions
 		refreshNode = new Action() {
@@ -182,34 +171,31 @@ public class ConfluenceView extends ViewPart {
 				viewer.setInput(model);
 				viewer.expandToLevel(2);
 			}
-
 		};
-
 		refreshNode.setText("Refresh");
 		refreshNode.setToolTipText("Refresh The Data For The Selected Item");
-		refreshNode.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_REFRESH_NODE));
+		refreshNode.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_REFRESH_NODE));
 		refreshNode.setEnabled(model.getServerCount() > 0);
-		
 		addServer = new Action() {
 			public void run() {
 				NewServerConnectionWizard wizard = new NewServerConnectionWizard();
 				// Instantiates the wizard container with the wizard and opens
 				// it
-				WizardDialog dialog = new WizardDialog(getViewSite().getShell(), wizard);
+				WizardDialog dialog = new WizardDialog(
+						getViewSite().getShell(), wizard);
 				dialog.create();
 				dialog.setTitle("Add New Confluence Server Connection");
-				if(dialog.open() == SWT.OK){
+				if (dialog.open() == SWT.OK) {
 					viewer.setInput(model);
 					refreshNode.setEnabled(model.getServerCount() > 0);
 				}
 			}
-			
 		};
-
 		addServer.setText("Add Confluence Server");
 		addServer.setToolTipText("Add a connection to a confluence server");
-		addServer.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_ADDSERVER));
-
+		addServer.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_ADDSERVER));
 		//node specific
 		List actions = makePageActions();
 		actionsMap.put(TreeAdapter.PAGE, actions);
@@ -218,15 +204,14 @@ public class ConfluenceView extends ViewPart {
 		actions = makeServerActions();
 		actionsMap.put(TreeAdapter.SERVER, actions);
 	}
-
 	protected TreeAdapter getSelectedNode() {
 		ISelection selection = viewer.getSelection();
 		Object node = ((IStructuredSelection) selection).getFirstElement();
 		return (TreeAdapter) node;
 	}
-
-	private TreeAdapter[] getSelectedNodes() {
-		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+	protected TreeAdapter[] getSelectedNodes() {
+		IStructuredSelection selection = (IStructuredSelection) viewer
+				.getSelection();
 		TreeAdapter selectedNodes[] = new TreeAdapter[selection.size()];
 		int i = 0;
 		for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
@@ -235,212 +220,199 @@ public class ConfluenceView extends ViewPart {
 		}
 		return selectedNodes;
 	}
-
-	 
 	private List makePageActions() {
 		List actionList = new ArrayList();
-
 		Action action = new Action() {
 			public void run() {
 				openPage();
 			}
-
 		};
 		action.setText("Edit");
-		action.setToolTipText("Opens the Selected Pages in a Confluence Editor");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_EDIT_PAGE));
+		action
+				.setToolTipText("Opens the Selected Pages in a Confluence Editor");
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_EDIT_PAGE));
 		actionList.add(action);
-
 		action = new Action() {
 			public void run() {
 				deletePage();
 			}
-
 		};
 		action.setText("Delete ...");
 		action.setToolTipText("Deletes The Selected Pages");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_DEL_PAGE));
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_DEL_PAGE));
 		actionList.add(action);
-
 		action = new Action() {
 			public void run() {
 				addChildPage();
 			}
-
 		};
-
 		action.setText("Add Child Page...");
 		action.setToolTipText("Adds a Child Page To The Selected Page");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_ADD_CHILD_PAGE));
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_ADD_CHILD_PAGE));
 		actionList.add(action);
-
 		action = new Action() {
 			public void run() {
 				renamePage();
 			}
-
 		};
-
 		action.setText("Rename Page...");
 		action.setToolTipText("Rename The Selected Page");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_RENAME_PAGE));
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_RENAME_PAGE));
 		actionList.add(action);
-
 		return actionList;
 	}
-
 	private List makeServerActions() {
 		List actionList = new ArrayList();
-
 		Action action = new Action() {
 			public void run() {
 				delServer();
 			}
-
 		};
 		action.setText("Delete Servers...");
 		action.setToolTipText("Delete This Server Entry");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_DEL_SERVER));
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_DEL_SERVER));
 		actionList.add(action);
-
 		return actionList;
 	}
-
 	/**
 	 *  
 	 */
 	protected void delServer() {
 		TreeAdapter[] server = getSelectedNodes();
-		if (MessageDialog.openQuestion(getSite().getShell(), "Delete Servers", "Delete Selected Servers?")) {
+		if (MessageDialog.openQuestion(getSite().getShell(), "Delete Servers",
+				"Delete Selected Servers?")) {
 			for (int i = 0; i < server.length; i++) {
 				ServerAdapter adapter = (ServerAdapter) server[i];
 				model.deleteServer(adapter);
 			}
 			viewer.refresh();
 		}
-		
 		refreshNode.setEnabled(model.getServerCount() > 0);
 	}
-
 	private List makeSpaceActions() {
 		List actionList = new ArrayList();
-
 		Action action = new Action() {
 			public void run() {
 				addPage();
 			}
-
 		};
 		action.setText("Add Page");
 		action.setToolTipText("Add a Page To This Space");
-		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_ADD_PAGE));
+		action.setImageDescriptor(plugin
+				.loadImageDescriptor(TimTamPlugin.IMG_ADD_PAGE));
 		actionList.add(action);
-
 		return actionList;
 	}
-
 	/**
 	 *  
 	 */
 	protected void addPage() {
 		ConfluenceSpace space = (ConfluenceSpace) getSelectedNode();
-		InputDialog dialog =
-			new InputDialog(getSite().getShell(), "New Page Name ?", "Enter New Page Name", null, null);
+		InputDialog dialog = new InputDialog(getSite().getShell(),
+				"New Page Name ?", "Enter New Page Name", null, null);
 		if (dialog.open() == Window.OK) {
 			Object newPage = space.createPage(dialog.getValue());
 			viewer.refresh();
-			viewer.setSelection(new StructuredSelection(new Object[] { newPage }), true);
+			viewer.setSelection(new StructuredSelection(new Object[]{newPage}),
+					true);
 			openEditor(newPage);
 		}
 	}
-
 	/**
 	 *  
 	 */
 	protected void renamePage() {
 		ConfluencePage page = (ConfluencePage) getSelectedNode();
-		InputDialog dialog =
-			new InputDialog(getSite().getShell(), "New Name ?", "Enter New Name", page.getTitle(), null);
+		InputDialog dialog = new InputDialog(getSite().getShell(),
+				"New Name ?", "Enter New Name", page.getTitle(), null);
 		if (dialog.open() == Window.OK) {
-			try{
+			try {
 				page.rename(dialog.getValue());
-			}catch(Exception e){
-				MessageDialog.openError(null, "Rename Page Fail", "Failed to Rename Page , See Erorr  Log For Details");
+			} catch (Exception e) {
+				MessageDialog.openError(null, "Rename Page Fail",
+						"Failed to Rename Page , See Erorr  Log For Details");
 				plugin.logException("failed deleteing pages", e);
-				
 			}
 			viewer.refresh();
 		}
 	}
-
 	/**
 	 *  
 	 */
 	protected void addChildPage() {
-		InputDialog dialog = new InputDialog(getSite().getShell(), "New Name ?", "Enter New Name", null, null);
+		InputDialog dialog = new InputDialog(getSite().getShell(),
+				"New Name ?", "Enter New Name", null, null);
 		if (dialog.open() == Window.OK) {
 			ConfluencePage page = (ConfluencePage) getSelectedNode();
 			Object child = page.createChild(dialog.getValue());
 			viewer.refresh();
-			viewer.setSelection(new StructuredSelection(new Object[] { child }), true);
+			viewer.setSelection(new StructuredSelection(new Object[]{child}),
+					true);
 			openEditor(child);
-
 		}
 	}
-
 	/**
 	 *  
 	 */
 	protected void deletePage() {
 		final TreeAdapter[] adapters = getSelectedNodes();
-		int totalPageCount  = totalPageCount(adapters);	
+		int totalPageCount = totalPageCount(adapters);
 		Shell shell = getSite().getShell();
-		if (!MessageDialog
-			.openQuestion(
-				shell,
-				"Delete Pages?",
-				"Delete " + totalPageCount+ " Selected Page"+(totalPageCount>1?"s":""))) {
+		if (!MessageDialog.openQuestion(shell, "Delete Pages?", "Delete "
+				+ totalPageCount + " Selected Page"
+				+ (totalPageCount > 1 ? "s" : ""))) {
 			return;
 		}
-
 		try {
-			new ProgressMonitorDialog(shell).run(false, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) {
-					monitor.beginTask("Deleting Pages...", adapters.length);
-					IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-					ITreeContentProvider provider = model.getContentProvider();
-					for (int i = 0; i < adapters.length; i++) {
-						closeAllEditors(workbenchPage,provider,adapters[i]);
-						ConfluencePage page = (ConfluencePage) adapters[i];
-						monitor.setTaskName("Deleting " + page.getTitle());
-						page.delete();
-						monitor.worked(1);
-					}
-					viewer.refresh();
-				}
-
-				private void closeAllEditors(IWorkbenchPage workbenchPage, ITreeContentProvider provider, Object node) {
-					IEditorPart part = workbenchPage.findEditor((IEditorInput) node);
-					if(part != null){
-						workbenchPage.closeEditor(part,true);
-					}
-					
-					if(provider.hasChildren(node)){
-						Object[] nodes = provider.getChildren(node);
-						for (int i = 0; i < nodes.length; i++) {
-							closeAllEditors(workbenchPage, provider, nodes[i]);
+			new ProgressMonitorDialog(shell).run(false, true,
+					new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) {
+							monitor.beginTask("Deleting Pages...",
+									adapters.length);
+							IWorkbenchPage workbenchPage = PlatformUI
+									.getWorkbench().getActiveWorkbenchWindow()
+									.getActivePage();
+							ITreeContentProvider provider = model
+									.getContentProvider();
+							for (int i = 0; i < adapters.length; i++) {
+								closeAllEditors(workbenchPage, provider,
+										adapters[i]);
+								ConfluencePage page = (ConfluencePage) adapters[i];
+								monitor.setTaskName("Deleting "
+										+ page.getTitle());
+								page.delete();
+								monitor.worked(1);
+							}
+							viewer.refresh();
 						}
-					}
-				}
-			});
-			
+						private void closeAllEditors(
+								IWorkbenchPage workbenchPage,
+								ITreeContentProvider provider, Object node) {
+							IEditorPart part = workbenchPage
+									.findEditor((IEditorInput) node);
+							if (part != null) {
+								workbenchPage.closeEditor(part, true);
+							}
+							if (provider.hasChildren(node)) {
+								Object[] nodes = provider.getChildren(node);
+								for (int i = 0; i < nodes.length; i++) {
+									closeAllEditors(workbenchPage, provider,
+											nodes[i]);
+								}
+							}
+						}
+					});
 		} catch (Exception e) {
-			MessageDialog.openError(shell, "Delete Pages Fail", "Failed to Delete Pages , See Erorr  Log For Details");
+			MessageDialog.openError(shell, "Delete Pages Fail",
+					"Failed to Delete Pages , See Erorr  Log For Details");
 			plugin.logException("failed deleteing pages", e);
 		}
-
 	}
-
 	/**
 	 * @param adapters
 	 * @return
@@ -450,11 +422,10 @@ public class ConfluenceView extends ViewPart {
 		int total = 0;
 		for (int i = 0; i < adapters.length; i++) {
 			TreeAdapter adapter = adapters[i];
-			total += countNodes(provider,adapter);
+			total += countNodes(provider, adapter);
 		}
 		return total;
 	}
-
 	/**
 	 * @param provider
 	 * @param adapter
@@ -462,45 +433,49 @@ public class ConfluenceView extends ViewPart {
 	 */
 	private int countNodes(ITreeContentProvider provider, Object node) {
 		int count = 1;
-		if(provider.hasChildren(node)){
+		if (provider.hasChildren(node)) {
 			Object[] nodes = provider.getChildren(node);
 			for (int i = 0; i < nodes.length; i++) {
-				count += countNodes(provider,nodes[i]);
+				count += countNodes(provider, nodes[i]);
 			}
 			return count;
 		}
-		
 		return 1;
 	}
-
 	protected void openPage() {
 		TreeAdapter[] adapters = getSelectedNodes();
 		for (int i = 0; i < adapters.length; i++) {
 			openEditor(adapters[i]);
 		}
-	} /**
-	   * @param obj
-	   */
+	}
+	/**
+	 * @param obj
+	 */
 	protected void openEditor(Object obj) {
 		try {
-			IEditorDescriptor descriptor =
-				PlatformUI.getWorkbench().getEditorRegistry().findEditor(
-					"org.codehaus.timtam.editors.TimTamPageEditor");
-			IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IEditorDescriptor descriptor = PlatformUI.getWorkbench()
+					.getEditorRegistry().findEditor(
+							"org.codehaus.timtam.editors.TimTamPageEditor");
+			IWorkbenchPage workbenchPage = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow().getActivePage();
 			workbenchPage.setEditorAreaVisible(true);
 			workbenchPage.openEditor((IEditorInput) obj, descriptor.getId());
 		} catch (WorkbenchException e) {
 			plugin.logException("failed to open an editor", e);
 		}
 	}
-
-	private void hookDoubleClickAction() {
+private void hookDoubleClickAction() {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				TreeAdapter adapter = getSelectedNode();
+				final TreeAdapter adapter = getSelectedNode();
 				Integer type = adapter.getType();
 				if (type.equals(TreeAdapter.SERVER)) {
-					model.refresh(adapter);
+					IRunnableWithProgress op = new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) {
+							 ((ServerAdapter)adapter).loadSpaces(monitor);
+						}
+					};
+					GUIUtil.runOperationWithProgress(op,null);
 					viewer.setInput(model);
 					viewer.expandToLevel(2);
 				} else if (type.equals(TreeAdapter.SPACE)) {
@@ -511,12 +486,9 @@ public class ConfluenceView extends ViewPart {
 			}
 
 		});
-	}
-
-	protected void openSpaceInfo(TreeAdapter adapter) {
+	}	protected void openSpaceInfo(TreeAdapter adapter) {
 		adapter.getType();
 	}
-
 	/**
 	 * Passing the focus request to the viewer's control.
 	 */

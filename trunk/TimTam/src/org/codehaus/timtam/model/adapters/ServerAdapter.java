@@ -66,10 +66,32 @@ public class ServerAdapter implements TreeAdapter {
 		}
 	}
 
+	public void loadSpaces(IProgressMonitor monitor) {
+		RemoteSpaceSummary[] spaceSummaries = null;
+		try {
+			monitor.setTaskName("Retreiving Spaces...");
+			spaceSummaries = service.getSpaces();
+			spaces.clear();
+		} catch (Exception e) {
+			TimTamPlugin.getInstance().logException("failed to get spaces", e);
+			return;
+		}
+		monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
+		for (int i = 0; i < spaceSummaries.length; i++) {
+			
+			RemoteSpaceSummary summary = spaceSummaries[i];
+			monitor.setTaskName(summary.name);
+			SpaceAdapter adapter = new SpaceAdapter(summary, this,service);
+			monitor.internalWorked(1);
+			spaces.add(adapter);
+		}
+		monitor.done();
+	}
+	
 	public void refresh(IProgressMonitor monitor) {
 		RemoteSpaceSummary[] spaceSummaries = null;
 		try {
-			monitor.setTaskName("Retreiving Space Summaries...");
+			monitor.setTaskName("Retreiving Spaces...");
 			spaceSummaries = service.getSpaces();
 			spaces.clear();
 			monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
