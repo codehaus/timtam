@@ -69,7 +69,7 @@ public class ServerAdapter implements TreeAdapter {
 	public void loadSpaces(IProgressMonitor monitor) {
 		RemoteSpaceSummary[] spaceSummaries = null;
 		try {
-			monitor.setTaskName("Retreiving Spaces...");
+			monitor.setTaskName("Retrieving Spaces...");
 			spaceSummaries = service.getSpaces();
 			spaces.clear();
 		} catch (Exception e) {
@@ -91,7 +91,7 @@ public class ServerAdapter implements TreeAdapter {
 	public void refresh(IProgressMonitor monitor) {
 		RemoteSpaceSummary[] spaceSummaries = null;
 		try {
-			monitor.setTaskName("Retreiving Spaces...");
+			monitor.setTaskName("Retrieving  Spaces...");
 			spaceSummaries = service.getSpaces();
 			spaces.clear();
 			monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
