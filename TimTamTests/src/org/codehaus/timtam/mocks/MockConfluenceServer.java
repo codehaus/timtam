@@ -3,9 +3,10 @@
  *
  * 
  */
-package org.codehaus.timtam;
+package org.codehaus.timtam.mocks;
 
 import org.codehaus.timtam.model.ConfluenceService;
+import org.codehaus.timtam.model.ConfluenceSpace;
 
 import com.atlassian.confluence.remote.NotPermittedException;
 import com.atlassian.confluence.remote.RemoteAttachment;
@@ -144,5 +145,11 @@ public class MockConfluenceServer implements ConfluenceService{
 	public RemoteBlogEntry getBlogEntry(long blogEntryId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * @param space
+	 */
+	public void addSpace(ConfluenceSpace space) {
 	}
 }

@@ -6,6 +6,7 @@
  */
 package org.codehaus.timtam;
 
+import org.codehaus.timtam.mocks.MockConfluenceServer;
 import org.codehaus.timtam.views.confluencetree.ConfluenceView;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
