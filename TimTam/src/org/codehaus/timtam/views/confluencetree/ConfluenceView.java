@@ -31,7 +31,7 @@
  * 
  *  
  */
-package org.codehaus.timtam.views;
+package org.codehaus.timtam.views.confluencetree;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -49,6 +49,8 @@ import org.codehaus.timtam.model.TimTamModel;
 import org.codehaus.timtam.model.adapters.ServerAdapter;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
 import org.codehaus.timtam.util.GUIUtil;
+import org.codehaus.timtam.views.confluencetree.model.TimTamContentProvider;
+import org.codehaus.timtam.views.confluencetree.model.TimTamLabelProvider;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -109,6 +111,8 @@ public class ConfluenceView extends ViewPart {
     private IAction pasteAction;
     private IAction cutAction;
 	private Action openInExternalBrowserAction;
+	private TimTamContentProvider timTamContentProvider;
+	private TimTamLabelProvider timTamLabelProvider;
 
     class NameSorter extends ViewerSorter {
     }
@@ -127,8 +131,10 @@ public class ConfluenceView extends ViewPart {
     public void createPartControl(Composite parent) {
         viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
         drillDownAdapter = new DrillDownAdapter(viewer);
-        viewer.setContentProvider(model.getContentProvider());
-        viewer.setLabelProvider(model.getLabelProvider());
+        timTamContentProvider = new TimTamContentProvider();
+		viewer.setContentProvider(timTamContentProvider);
+        timTamLabelProvider = new TimTamLabelProvider();
+		viewer.setLabelProvider( timTamLabelProvider);
         viewer.setSorter(new NameSorter());
         viewer.setInput(model);
         makeActions();
@@ -357,7 +363,7 @@ public class ConfluenceView extends ViewPart {
 
         ListSelectionDialog dialog = new ListSelectionDialog(getSite()
                 .getShell(), model.getServers(), new ArrayContentProvider(),
-                model.getLabelProvider(), "Delete Servers");
+				timTamLabelProvider, "Delete Servers");
 
         //dialog.getOkButton().setText("Delete");
         dialog.setTitle("Delete Servers");
@@ -507,8 +513,7 @@ public class ConfluenceView extends ViewPart {
                             IWorkbenchPage workbenchPage = PlatformUI
                                     .getWorkbench().getActiveWorkbenchWindow()
                                     .getActivePage();
-                            ITreeContentProvider provider = model
-                                    .getContentProvider();
+                            ITreeContentProvider provider = timTamContentProvider;
                             for (int i = 0; i < adapters.length; i++) {
                                 closeAllEditors(workbenchPage, provider,
                                         adapters[i]);
@@ -559,7 +564,7 @@ public class ConfluenceView extends ViewPart {
      * @return
      */
     private int totalPageCount(TreeAdapter[] adapters) {
-        ITreeContentProvider provider = model.getContentProvider();
+        ITreeContentProvider provider = timTamContentProvider; 
         int total = 0;
         for (int i = 0; i < adapters.length; i++) {
             TreeAdapter adapter = adapters[i];
@@ -671,8 +676,8 @@ public class ConfluenceView extends ViewPart {
         title.append(" The Following Pages To : ");
         title.append(targetAdapter.getText());
         ListSelectionDialog dialog = new ListSelectionDialog(getSite()
-                .getShell(), adapters, new ArrayContentProvider(), model
-                .getLabelProvider(), title.toString());
+                .getShell(), adapters, new ArrayContentProvider(), 
+                timTamLabelProvider, title.toString());
         dialog.setInitialSelections(adapters);
         if (dialog.open() == Window.OK) {
             final Object[] pagesToCopy = dialog.getResult();

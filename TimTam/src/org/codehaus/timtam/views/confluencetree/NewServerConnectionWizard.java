@@ -37,7 +37,7 @@
 *
 */
 
-package org.codehaus.timtam.views;
+package org.codehaus.timtam.views.confluencetree;
 
 import java.lang.reflect.InvocationTargetException;
 
