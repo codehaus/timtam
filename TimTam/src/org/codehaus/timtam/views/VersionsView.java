@@ -43,7 +43,7 @@ import java.text.DateFormat;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
-import org.codehaus.timtam.model.TimTamHistoryItem;
+import org.codehaus.timtam.model.versioning.TimTamHistoryItem;
 import org.eclipse.compare.EditionSelectionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;

@@ -39,6 +39,7 @@
 package org.codehaus.timtam.model;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.model.exceptions.LoginFailureException;
 
 import com.atlassian.confluence.remote.ConfluenceSoapHelper;
 import com.atlassian.confluence.remote.IConfluenceSoapService;
