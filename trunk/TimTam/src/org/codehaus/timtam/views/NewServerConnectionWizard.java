@@ -82,7 +82,7 @@ public class NewServerConnectionWizard extends Wizard {
 
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
-				doFinish(page.server, page.user, page.password, monitor);
+				doFinish(page.server, page.user, page.password, page.useProxy,monitor);
 				monitor.done();
 			}
 		};
@@ -101,13 +101,14 @@ public class NewServerConnectionWizard extends Wizard {
 	 * The worker method. It will find the container, create the file if
 	 * missing or just replace its contents, and open the editor on the newly
 	 * created file.
+	 * @param useProxy
 	 */
 
-	protected void doFinish(String server, String user, String password, IProgressMonitor monitor) throws InvocationTargetException {
+	protected void doFinish(String server, String user, String password, boolean useProxy, IProgressMonitor monitor) throws InvocationTargetException {
 		monitor.setTaskName("Trying to connect to " + server + " ...");
 		monitor.worked(1);
 		try {
- 			TimTamModel.getInstace().addServer(server, user, password);
+ 			TimTamModel.getInstace().addServer(server, user, password, useProxy);
 		} catch (Exception e) {
 			final String errorMessage = "Connection to " + server + " failed :\n" + e.getMessage();
 			Display.getDefault().syncExec(new Runnable() {
