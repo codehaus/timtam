@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="TimTam"
+   name="TimTam Plug-in"
+   version="1.0.0"
+   provider-name="Zohar Melamed"
+   class="org.codehaus.timtam.TimTamPlugin">
+
+   <runtime>
+      <library name="TimTam.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/glue-all.jar"/>
+      <library name="lib/glue-config.jar"/>
+      <library name="lib/xstream-0.3.jar"/>
+      <library name="lib/commons-io-SNAPSHOT.jar"/>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+   </requires>
+
+
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml">
+      </toc>
+      <toc
+            file="testToc.xml"
+            primary="true">
+      </toc>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="TimTam Editor"
+            icon="icons/page.gif"
+            extensions="conf"
+            contributorClass="org.codehaus.timtam.editors.TimTamMultiPageEditorContributor"
+            class="org.codehaus.timtam.editors.TimTamPageEditor"
+            id="org.codehaus.timtam.editors.TimTamPageEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Confluence"
+            class="org.codehaus.timtam.preferences.TimTamPreferencePage"
+            id="org.codehaus.timtam.preferences.TimTamPreferencePage">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IFile"
+            name="Confluence Properties"
+            nameFilter="*.*"
+            class="org.codehaus.timtam.properties.TimTamPropertyPage"
+            id="org.codehaus.timtam.properties.samplePropertyPage">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Confluence"
+            id="TimTam">
+      </category>
+      <view
+            name="Confluence"
+            icon="icons/space.gif"
+            category="TimTam"
+            class="org.codehaus.timtam.views.ConfluenceView"
+            id="org.codehaus.timtam.views.ConfluenceView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.documentProviders">
+      <provider
+            class="org.codehaus.timtam.model.ConfluenceDocumentProvider"
+            inputTypes="org.codehaus.timtam.model.adapters.PageAdapter"
+            id="org.codehaus.timtam.model.ConfluenceDocumentProvider">
+      </provider>
+   </extension>
+   <extension
+         id="org.codehaus.timtam"
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="TimTam"
+            icon="icons/space.gif"
+            class="org.codehaus.timtam.perspective.TimTamPerspectiveFactory"
+            id="TimTam.perspective">
+      </perspective>
+   </extension>
+
+   <extension 
+         point="org.eclipse.ui.commands">
+      <command
+            name="Toggle Edit/Preview"
+            description="Toggle Between Edit and Preview Mode"
+            category="org.eclipse.ui.category.edit"
+            id="org.codehaus.timtam.edit.toggle">
+      </command>
+      <keyBinding
+            string="Ctrl+."
+            scope="org.eclipse.ui.textEditorScope"
+            command="org.codehaus.timtam.edit.toggle"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+   </extension>
+
+</plugin>
