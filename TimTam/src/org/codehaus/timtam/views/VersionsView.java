@@ -43,7 +43,6 @@ import java.text.DateFormat;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
-import org.codehaus.timtam.model.TimTamHistoryItem;
 import org.eclipse.compare.EditionSelectionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -76,7 +75,6 @@ public class VersionsView extends ViewPart implements IPartListener {
 	private Action doubleClickAction;
 	private static RemotePageHistory[] EMPTY= new RemotePageHistory[0];  
 	public static final String CONFLUENCE_VERSIONSVIEW_ID = "org.codehaus.timtam.views.VersionsView";
-	private IWorkbenchPart currPart;
 	private ConfluencePage confPage;
 	private RemotePageHistory[] histories;
 
@@ -157,7 +155,7 @@ public class VersionsView extends ViewPart implements IPartListener {
 					dialog.setEditionTitleArgument(confPage.getTitle());
 					dialog.setEditionTitleImage(TimTamPlugin.getInstance().getPageIcon(confPage));
 					dialog.setBlockOnOpen(true);
-					TimTamHistoryItem items[] = new TimTamHistoryItem [histories.length];
+					//TimTamHistoryItem items[] = new TimTamHistoryItem [histories.length];
 				}
 		};
 		
@@ -209,7 +207,6 @@ public class VersionsView extends ViewPart implements IPartListener {
 	 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void partActivated(IWorkbenchPart part) {
-		currPart = part;
 		IEditorInput input = (IEditorInput) part.getAdapter(IEditorInput.class);
 		if(input != null){
 			confPage = (ConfluencePage) input.getAdapter(ConfluencePage.class);
