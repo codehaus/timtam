@@ -53,6 +53,7 @@ import org.codehaus.timtam.model.search.SearchResult;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 
 import com.atlassian.confluence.remote.RemoteException;
 import com.thoughtworks.xstream.XStream;
@@ -132,12 +133,16 @@ public class TimTamModel {
 	 * @param adapter
 	 */
 	private void loadServerData(final ServerAdapter adapter) {
-		IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) {
-				adapter.loadSpaces(monitor);
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				IRunnableWithProgress op = new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) {
+						adapter.loadSpaces(monitor);
+					}
+				};
+				GUIUtil.runOperationWithProgress(op, null);
 			}
-		};
-		GUIUtil.runOperationWithProgress(op, null);
+		});
 	}
 
 	/**
