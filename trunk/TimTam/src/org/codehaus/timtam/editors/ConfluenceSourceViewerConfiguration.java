@@ -45,7 +45,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -110,21 +109,8 @@ public class ConfluenceSourceViewerConfiguration extends SourceViewerConfigurati
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentFormatter(org.eclipse.jface.text.source.ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
-		ContentFormatter formatter = new ContentFormatter();
-		formatter.setFormattingStrategy(new IFormattingStrategy(){
-
-			public void formatterStarts(String initialIndentation) {
-			}
-
-			public String format(String content, boolean isLineStart, String indentation, int[] positions) {
-				return null;
-			}
-
-			public void formatterStops() {
-			}
-			
-		},IDocument.DEFAULT_CONTENT_TYPE);
-		
-		return formatter;
+		ContentFormatter contentFormatter = new ContentFormatter();
+		contentFormatter.setFormattingStrategy(new TimtamtFormatingStrategy(),IDocument.DEFAULT_CONTENT_TYPE);
+		return contentFormatter;
 	}
 }
