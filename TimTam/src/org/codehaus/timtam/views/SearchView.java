@@ -230,6 +230,7 @@ public class SearchView extends ViewPart {
 				Object obj = ((IStructuredSelection) selection).getFirstElement();
 				SearchResult result = (SearchResult) obj;
 				SearchResultBrowser browser = getSearchBrowser(result);
+				browser.navigateTo(result.getUrl());
 			}
 		};
 	}
