@@ -5,6 +5,9 @@
  */
 package org.codehaus.timtam.mocks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.ConfluenceSpace;
 
@@ -27,35 +30,37 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  */
 public class MockConfluenceServer implements ConfluenceService{
 
+	private List spaces = new ArrayList();
+	private String user;
+	private String lastSearch;
+	private RemoteSearchResult[] searchResults;
+
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.ConfluenceService#getUser()
 	 */
 	public String getUser() {
-		// TODO Auto-generated method stub
-		return null;
+		return user;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.ConfluenceService#search(java.lang.String, int)
 	 */
 	public RemoteSearchResult[] search(String query, int maxResults) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		lastSearch = query;
+		return searchResults;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.ConfluenceService#logout()
 	 */
 	public boolean logout() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.ConfluenceService#getPage(long)
 	 */
 	public RemotePage getPage(long pageId) throws RemoteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -151,5 +156,6 @@ public class MockConfluenceServer implements ConfluenceService{
 	 * @param space
 	 */
 	public void addSpace(ConfluenceSpace space) {
+		spaces.add(space);
 	}
 }

@@ -6,13 +6,14 @@
  */
 package org.codehaus.timtam;
 
-import org.codehaus.timtam.model.ConfluenceService;
-import org.codehaus.timtam.model.ConfluenceSpace;
-import org.codehaus.timtam.model.TimTamModel;
-import org.codehaus.timtam.model.TimTamServiceFactory;
+import org.codehaus.timtam.model.exceptions.LoginFailureException;
 import org.codehaus.timtam.views.confluencetree.ConfluenceView;
-import org.easymock.MockControl;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+
+import com.atlassian.confluence.remote.RemoteException;
+import com.atlassian.confluence.remote.RemoteSpaceSummary;
 
 
 /**
@@ -22,40 +23,32 @@ import org.eclipse.jface.viewers.TreeViewer;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class SpaceViewTestCase extends TimTamAbstractTestCase {
-	public void testViewDisplaysSpacesInTree() {
+	public void testViewDisplaysSpacesInTree() throws LoginFailureException, InterruptedException, RemoteException {
 
-		
-		
-		// Hacky way of pushing in a mock...
-		TimTamServiceFactory original = TimTamModel.getInstance().getServiceFactory();
-		TimTamModel.getInstance().setServiceFactory(new TimTamServiceFactory(){
-			public ConfluenceService getService(String server, String user,String password, boolean useProxy) {
-				// return mock of ConfluenceService
-				return getMockConfServer();
-			}
-		});
-		
-		///setup 
-		MockControl control = MockControl.createControl(ConfluenceSpace.class);
-		ConfluenceSpace mockSpace = (ConfluenceSpace) control.getMock();
 		// expectations
-		mockSpace.getName();
-		control.setReturnValue("MockSpace");
-		control.replay();
-		//test
-		getMockConfServer().addSpace(mockSpace);
 
-		
+		RemoteSpaceSummary spaceSummary = new RemoteSpaceSummary();
+		spaceSummary.key = "TST";
+		spaceSummary.name="Testy";
+		spaceSummary.url="testurl";
+		mockService.getSpaces();
+		serverControl.setReturnValue(new RemoteSpaceSummary[]{spaceSummary});
+		serverControl.replay();
+
+		//test
+		model.addServer("testserver","testuser","testpassword",false);		
 		ConfluenceView confluenceView = getConfluenceView();
 		TreeViewer confTree = (TreeViewer) confluenceView.getViewer();
-		Object[] expandedElements = confTree.getExpandedElements();
-		assertEquals("we expect to see a server and a single space",2,expandedElements.length);
-		
-		//verify 
-		control.verify();
-
-		// you want to do this in a teardown
-		TimTamModel.getInstance().setServiceFactory(original);
+		ITreeContentProvider contentProvider = (ITreeContentProvider )confTree.getContentProvider();
+		ILabelProvider labelProvider = (ILabelProvider )confTree.getLabelProvider();
+		Object servers[] = contentProvider.getElements(confTree.getInput());
+		assertEquals("we expect to see a single server as root",1,servers.length);
+		assertEquals("named testuser@testserver","testuser@testserver",labelProvider.getText(servers[0]));
+		Object[] spaces =  contentProvider.getChildren(servers[0]);
+		assertEquals("we expect to see a single space ",1,spaces.length);
+		assertEquals("named Testy","Testy",labelProvider.getText(spaces[0]));
+		//verify
+		serverControl.verify();
 	}
 
 }
