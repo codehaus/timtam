@@ -158,7 +158,6 @@ public class VersionsView extends ViewPart implements IPartListener {
 					TimTamHistoryItem items[] = TimTamHistoryItem.creatHistoryItems(confPage,histories);
 					try {
 						dialog.selectEdition(new TimTamHistoryItem(confPage),items,null);
-						dialog.open();
 					} catch (RemoteException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

@@ -195,6 +195,7 @@ public class ConfluenceView extends ViewPart {
                 model.refresh(node);
                 viewer.setInput(model);
                 viewer.expandToLevel(2);
+                viewer.setSelection(new StructuredSelection(node));
             }
         };
         refreshNode.setText("Refresh");

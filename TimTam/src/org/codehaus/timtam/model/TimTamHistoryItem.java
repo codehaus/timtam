@@ -73,7 +73,7 @@ public class TimTamHistoryItem implements IStreamContentAccessor, ITypedElement,
 	 * @see org.eclipse.compare.ITypedElement#getName()
 	 */
 	public String getName() {
-		return page.getTitle()+" - Version "+version;
+		return version;
 	}
 
 	/* (non-Javadoc)
@@ -87,7 +87,7 @@ public class TimTamHistoryItem implements IStreamContentAccessor, ITypedElement,
 	 * @see org.eclipse.compare.ITypedElement#getType()
 	 */
 	public String getType() {
-		return "Confluence Page";
+		return TEXT_TYPE;
 	}
 
 	/* (non-Javadoc)
