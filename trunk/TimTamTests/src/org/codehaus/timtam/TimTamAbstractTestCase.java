@@ -6,6 +6,9 @@
  */
 package org.codehaus.timtam;
 
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
 import junit.framework.TestCase;
 
 /**
@@ -16,17 +19,32 @@ import junit.framework.TestCase;
  */
 public class TimTamAbstractTestCase extends TestCase{
 	
-	/* open the timtam perspective, 
+	private MockConfluenceServer mockConfServer;
+	private static final String TIMTAM_PERSPECTIVE = "org.codehaus.timtam.perspective.TimTamPerspective";
+
+	/*  
+	 * open the timtam perspective, 
 	 * and hook up a mook confluence server 
 	 * 
 	 */
 	protected void setUp() throws Exception {
+		mockConfServer = new MockConfluenceServer();
 		
+		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		PlatformUI.getWorkbench().showPerspective(TIMTAM_PERSPECTIVE,activeWorkbenchWindow);
 	}
 
 	/* Disconect from the mock timtam server and
 	 * close the timtam perspective
 	 */
 	protected void tearDown() throws Exception {
+		mockConfServer = null;
+	}
+	
+	/**
+	 * @return Returns the mockConfServer.
+	 */
+	public MockConfluenceServer getMockConfServer() {
+		return mockConfServer;
 	}
 }
