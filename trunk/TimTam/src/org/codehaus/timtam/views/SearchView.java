@@ -106,8 +106,8 @@ public class SearchView extends ViewPart {
 	}
 	static class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		private static final int TITLE = 0;
-		private static final int SERVER = 1;
-		private static final int EXCERPT = 2;
+		private static final int EXCERPT = 1;
+		private static final int SERVER = 2;
 		private HashMap imageMap = new HashMap();
 		public ViewLabelProvider() {
 			super();
