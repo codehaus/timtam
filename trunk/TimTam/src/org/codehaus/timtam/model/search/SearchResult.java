@@ -31,7 +31,7 @@
  * 
  *  
  */
-package org.codehaus.timtam.model;
+package org.codehaus.timtam.model.search;
 
 import com.atlassian.confluence.remote.RemoteSearchResult;
 

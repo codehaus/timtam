@@ -37,9 +37,9 @@ import java.util.HashMap;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.editors.SearchResultBrowser;
-import org.codehaus.timtam.model.SearchResult;
-import org.codehaus.timtam.model.SearchResultBrowserInput;
 import org.codehaus.timtam.model.TimTamModel;
+import org.codehaus.timtam.model.search.SearchResult;
+import org.codehaus.timtam.model.search.SearchResultBrowserInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;

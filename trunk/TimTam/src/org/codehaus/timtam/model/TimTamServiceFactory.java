@@ -36,6 +36,8 @@
 
 package org.codehaus.timtam.model;
 
+import org.codehaus.timtam.model.exceptions.LoginFailureException;
+
 /**
  * @author Sarah
  *

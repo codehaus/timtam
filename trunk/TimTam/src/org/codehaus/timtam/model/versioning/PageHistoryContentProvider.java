@@ -36,7 +36,7 @@
 *
 *
 */
-package org.codehaus.timtam.model;
+package org.codehaus.timtam.model.versioning;
 
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.Viewer;

@@ -36,7 +36,7 @@
 *
 *
 */
-package org.codehaus.timtam.model;
+package org.codehaus.timtam.model.exceptions;
 
 /**
  * @author zohar melamed

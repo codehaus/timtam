@@ -43,7 +43,7 @@ import java.util.Collection;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceService;
-import org.codehaus.timtam.model.SearchResult;
+import org.codehaus.timtam.model.search.SearchResult;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 

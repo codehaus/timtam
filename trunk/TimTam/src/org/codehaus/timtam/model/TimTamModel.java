@@ -48,6 +48,8 @@ import org.apache.commons.io.IOUtil;
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.adapters.ServerAdapter;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
+import org.codehaus.timtam.model.exceptions.LoginFailureException;
+import org.codehaus.timtam.model.search.SearchResult;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;

@@ -4,12 +4,13 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package org.codehaus.timtam.model;
+package org.codehaus.timtam.model.versioning;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.model.ConfluencePage;
 import org.eclipse.compare.IModificationDate;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
