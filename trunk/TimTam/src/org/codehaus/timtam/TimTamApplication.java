@@ -7,7 +7,6 @@
 package org.codehaus.timtam;
 
 import org.eclipse.core.runtime.IPlatformRunnable;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.WorkbenchAdvisor;
@@ -35,9 +34,10 @@ public class TimTamApplication implements IPlatformRunnable {
 			int returnCode = PlatformUI.createAndRunWorkbench(display, workbenchAdvisor);
 			if (returnCode == PlatformUI.RETURN_RESTART) {
 				return IPlatformRunnable.EXIT_RESTART;
-			} else {
-				return IPlatformRunnable.EXIT_OK;
-			}
+			} 
+			
+			return IPlatformRunnable.EXIT_OK;
+
 		} finally {
 			display.dispose();
 		}
