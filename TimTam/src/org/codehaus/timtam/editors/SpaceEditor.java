@@ -171,7 +171,7 @@ public class SpaceEditor extends EditorPart implements IHyperlinkListener{
 		try {
 		    RemoteBlogEntry[] blogEntries = space.getBlogEntries();
 		    StringBuffer formText = new StringBuffer("<form>");
-            for (int i = 0; i < blogEntries.length; i++) {
+            for (int i = blogEntries.length-1; i >=0; i--) {
                 RemoteBlogEntry entry = blogEntries[i];
                 formText.append("<p><b>").append(entry.title).append("</b></p>");
                 formText.append("<p>");
