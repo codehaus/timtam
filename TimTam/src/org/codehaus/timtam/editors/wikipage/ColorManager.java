@@ -35,22 +35,47 @@
 
 *
 *
-*
 */
 
-package org.codehaus.timtam.editors;
+package org.codehaus.timtam.editors.wikipage;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author MelamedZ
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * 
+ * To change the template for this generated type comment go to Window -
+ * Preferences - Java - Code Generation - Code and Comments
  */
-public class ConfluencePartitionScanner {
+public class ColorManager {
+	
+	protected static Map fColorTable = new HashMap(10);
+	
+	static{
+		fColorTable.put(ConfluencePartitionScanner.MARKUP,new Color(Display.getCurrent(), new RGB(0,0,255)));
+		fColorTable.put(ConfluencePartitionScanner.LINK,new Color(Display.getCurrent(), new RGB(0,128,0)));
+		fColorTable.put(ConfluencePartitionScanner.MACRO,new Color(Display.getCurrent(), new RGB(0,0,255)));
+		fColorTable.put(ConfluencePartitionScanner.HEADINGS,new Color(Display.getCurrent(), new RGB(255,0,0)));
+	}
+	
+	public void dispose() {
+		Iterator e = fColorTable.values().iterator();
+		while (e.hasNext())
+			 ((Color) e.next()).dispose();
+	}
 
-	public final static String MACRO = "conf_macro";
-	public final static String MARKUP = "conf_macro";
-	public final static String LINK  = "conf_links";
-	public final static String HEADINGS = "conf_headings";
+	/**
+	 * @param string
+	 * @return
+	 */
+	public static Color getColor(String key) {
+		return (Color) fColorTable.get(key);
+	}
 
 }

@@ -36,7 +36,7 @@
 *
 *
 */
-package org.codehaus.timtam.editors;
+package org.codehaus.timtam.editors.wikipage;
 
 import org.codehaus.timtam.template.ConfluenceCompletionProcessor;
 import org.eclipse.jface.text.IDocument;

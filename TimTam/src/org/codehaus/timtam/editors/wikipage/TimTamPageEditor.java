@@ -39,7 +39,7 @@
 
 
 
-package org.codehaus.timtam.editors;
+package org.codehaus.timtam.editors.wikipage;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;

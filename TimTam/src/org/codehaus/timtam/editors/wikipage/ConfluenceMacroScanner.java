@@ -36,16 +36,19 @@
 *
 *
 */
+package org.codehaus.timtam.editors.wikipage;
 
-package org.codehaus.timtam.editors;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WordRule;
 
 /**
  * @author MelamedZ
@@ -53,29 +56,41 @@ import org.eclipse.swt.widgets.Display;
  * To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Generation - Code and Comments
  */
-public class ColorManager {
-	
-	protected static Map fColorTable = new HashMap(10);
-	
-	static{
-		fColorTable.put(ConfluencePartitionScanner.MARKUP,new Color(Display.getCurrent(), new RGB(0,0,255)));
-		fColorTable.put(ConfluencePartitionScanner.LINK,new Color(Display.getCurrent(), new RGB(0,128,0)));
-		fColorTable.put(ConfluencePartitionScanner.MACRO,new Color(Display.getCurrent(), new RGB(0,0,255)));
-		fColorTable.put(ConfluencePartitionScanner.HEADINGS,new Color(Display.getCurrent(), new RGB(255,0,0)));
+public class ConfluenceMacroScanner extends RuleBasedScanner {
+	private static Set headerChars = new HashSet();
+	static {
+		headerChars.add(new Character('1'));
 	}
-	
-	public void dispose() {
-		Iterator e = fColorTable.values().iterator();
-		while (e.hasNext())
-			 ((Color) e.next()).dispose();
-	}
+	ConfluenceMacroScanner() {
 
-	/**
-	 * @param string
-	 * @return
-	 */
-	public static Color getColor(String key) {
-		return (Color) fColorTable.get(key);
-	}
 
+		IToken macro = new Token(new TextAttribute(ColorManager.getColor(ConfluencePartitionScanner.MACRO)));
+		IToken link = new Token(new TextAttribute(ColorManager.getColor(ConfluencePartitionScanner.LINK)));
+		IToken header = new Token(new TextAttribute(ColorManager.getColor(ConfluencePartitionScanner.HEADINGS)));
+
+		IRule[] rules = new IRule[3];
+		// Add rule for macros
+		int i = 0;
+		rules[i++] = new SingleLineRule("{", "}", macro, '\\');
+		rules[i++] = new SingleLineRule("[", "]", link, '\\');
+
+		
+		WordRule headingRule = new WordRule(new IWordDetector() {
+			public boolean isWordStart(char c) {
+				return c == 'h';
+			}
+
+			public boolean isWordPart(char c) {
+				return Character.isDigit(c) || c == '.';
+			}
+		});
+		
+		headingRule.setColumnConstraint(0);
+		for(int h = 1; h < 7;++h){
+			headingRule.addWord("h"+Integer.toString(h)+".",header);
+		}
+
+		rules[i++] = headingRule; 
+		setRules(rules);
+	}
 }
