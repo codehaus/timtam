@@ -94,13 +94,16 @@ class AccountDetails {
 }
 public class TimTamModel {
 	private TimTamContentProvider contentProvider = new TimTamContentProvider();
+	private TimTamServiceFactory serviceFactory;
 	private LabelProvider labelProvider = new TimTamLabelProvider();
 	private static TimTamModel instance = new TimTamModel();
 	protected List serverAdapters = new ArrayList();
 	protected List accountDetails = new ArrayList();
 	Map adapterToAccountDetails = new HashMap();
 	final TimTamPlugin plugin = TimTamPlugin.getInstance();
+
 	private TimTamModel() {
+		serviceFactory = new TimTamServiceFactory();
 	}
 	/**
 	 * @param server
@@ -114,7 +117,7 @@ public class TimTamModel {
 		accountDetails.add(details);
 	}
 	private ServerAdapter addServer(AccountDetails account) throws LoginFailureException {
-		ConfluenceService service = TimTamModelFactory.getService(account.url, account.user, account.password,account.useProxy);
+		ConfluenceService service = serviceFactory.getService(account.url, account.user, account.password,account.useProxy);
 		final ServerAdapter adapter = new ServerAdapter(account.url, account.user , service);
 		adapterToAccountDetails.put(adapter, account);
 		serverAdapters.add(adapter);

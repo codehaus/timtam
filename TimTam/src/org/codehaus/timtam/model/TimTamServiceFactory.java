@@ -40,9 +40,9 @@ package org.codehaus.timtam.model;
  * @author Sarah
  *
  */
-public class TimTamModelFactory {
+public class TimTamServiceFactory {
     private static final String CONFLUENCE_SOAP_EP = "/rpc/soap/confluenceservice-v1.wsdl";
-	public static ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
+	public ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
 	
 		ConfluenceServiceImpl instance = new ConfluenceServiceImpl();
 	    instance.password = password;
