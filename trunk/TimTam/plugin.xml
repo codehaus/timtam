@@ -50,10 +50,10 @@
             id="org.codehaus.timtam.editors.TimTamPageEditor">
       </editor>
       <editor
-            name="Space Editor"
+            class="org.codehaus.timtam.editors.space.SpaceEditor"
             icon="icons/space.gif"
-            contributorClass="org.codehaus.timtam.editors.space.SpaceEditorContributor"
-            class="org.codehaus.timtam.editors.SpaceEditor"
+            contributorClass="org.eclipse.ui.part.EditorActionBarContributor"
+            name="Space Editor"
             id="org.codehaus.timtam.editors.SpaceEditor">
       </editor>
       <editor
@@ -93,7 +93,7 @@
             icon="icons/list_pages.gif"
             category="org.codehaus.timtam"
             class="org.codehaus.timtam.views.confluencetree.ConfluenceView"
-            id="org.codehaus.timtam.views.ConfluenceView">
+            id="org.codehaus.timtam.views.confluencetree.ConfluenceView">
       </view>
       <view
             name="Search"
