@@ -1,0 +1,2 @@
+#enable tracing for the timtam plugin
+org.codehaus.timtam/trace=true
