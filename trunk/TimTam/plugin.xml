@@ -67,7 +67,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            name="Confluence"
+            name="TimTam"
             class="org.codehaus.timtam.preferences.TimTamPreferencePage"
             id="org.codehaus.timtam.preferences.TimTamPreferencePage">
       </page>
@@ -89,7 +89,7 @@
             id="org.codehaus.timtam">
       </category>
       <view
-            name="Confluence"
+            name="Confluence Navigator"
             icon="icons/list_pages.gif"
             category="org.codehaus.timtam"
             class="org.codehaus.timtam.views.ConfluenceView"
