@@ -214,16 +214,15 @@ public class TimTamPlugin extends AbstractUIPlugin {
         }
     }
 
-    public void logException(final String message, final Exception e,
+    public void logException(final String message, final Throwable t,
             boolean tellUser) {
         IStatus status = new Status(IStatus.ERROR, getBundle()
-                .getSymbolicName(), 0, message, e); //$NON-NLS-1$
+                .getSymbolicName(), 0, message, t); //$NON-NLS-1$
         getLog().log(status);
         if (tellUser) {
             Display.getDefault().syncExec(new Runnable() {
                 public void run() {
-                    MessageDialog.openError(null, "TimTam Error " + message, e
-                            .getMessage());
+                    MessageDialog.openError(null, "TimTam Error " + message, t.getMessage());
                 }
             });
         }
@@ -235,10 +234,9 @@ public class TimTamPlugin extends AbstractUIPlugin {
         if (page.isHomePage()) {
             return page.isReadOnly() ? registry.get(IMG_READONLY_HOMEPAGE)
                     : registry.get(IMG_SPACEHOME);
-        } else {
-            return page.isReadOnly() ? registry.get(IMG_READONLY_PAGE)
-                    : registry.get(IMG_PAGE);
-        }
+        } 
+        
+        return page.isReadOnly() ? registry.get(IMG_READONLY_PAGE): registry.get(IMG_PAGE);
     }
 
     public Image getSpaceIcon(ConfluenceSpace space) {
@@ -267,12 +265,6 @@ public class TimTamPlugin extends AbstractUIPlugin {
         return null;
     }
 
-    /**
-     * @return
-     */
-    public boolean shouldUseProxy() {
-        return getPreferenceStore().getBoolean(P_USE_PROXY);
-    }
 
     /**
      * @return
@@ -406,7 +398,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
      *  
      */
     public void init() {
-        createImageRegistry();
+        getImageRegistry();
         TimTamModel.getInstace().startup();
     }
 

@@ -64,6 +64,7 @@ public class TimTamWorkbenchAdvisor extends WorkbenchAdvisor {
 	}
 
 	private MenuManager createEditMenu(IWorkbenchWindow window) {
+	    
 		MenuManager menu = new MenuManager(Messages.getString("Edit"), //$NON-NLS-1$
 				IWorkbenchActionConstants.M_EDIT);
 		menu.add(new GroupMarker(IWorkbenchActionConstants.EDIT_START));
