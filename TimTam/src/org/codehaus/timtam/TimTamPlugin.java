@@ -260,15 +260,15 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	public Image getPageIcon(ConfluencePage page) {
 		ImageRegistry registry = getImageRegistry();
 		if(page.isHomePage()){
-			return page.readOnly()?registry.get(IMG_READONLY_HOMEPAGE):registry.get(IMG_SPACEHOME);
+			return page.isReadOnly()?registry.get(IMG_READONLY_HOMEPAGE):registry.get(IMG_SPACEHOME);
 		}else{
-			return page.readOnly()?registry.get(IMG_READONLY_PAGE):registry.get(IMG_PAGE);
+			return page.isReadOnly()?registry.get(IMG_READONLY_PAGE):registry.get(IMG_PAGE);
 		}
 	}
 
 	public Image getSpaceIcon(ConfluenceSpace space) {
 		ImageRegistry registry = getImageRegistry();
-		if(!space.isLoaded()){
+		if(!space.isHealty()){
 			return registry.get(IMG_BROKEN_SPACE);
 		}
 		
