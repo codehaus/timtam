@@ -43,6 +43,7 @@ import java.text.DateFormat;
 
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
+import org.codehaus.timtam.model.TimTamHistoryItem;
 import org.eclipse.compare.EditionSelectionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -151,17 +152,24 @@ public class VersionsView extends ViewPart implements IPartListener {
 					
 					EditionSelectionDialog dialog = new EditionSelectionDialog(getSite().getShell(),
 																			   TimTamPlugin.getInstance().getResourceBundle());
-					
 					dialog.setEditionTitleArgument(confPage.getTitle());
 					dialog.setEditionTitleImage(TimTamPlugin.getInstance().getPageIcon(confPage));
 					dialog.setBlockOnOpen(true);
-					//TimTamHistoryItem items[] = new TimTamHistoryItem [histories.length];
+					TimTamHistoryItem items[] = TimTamHistoryItem.creatHistoryItems(confPage,histories);
+					try {
+						dialog.selectEdition(new TimTamHistoryItem(confPage),items,null);
+						dialog.open();
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				}
 		};
 		
 		compare.setText("View Diff");
 		compare.setToolTipText("View Differences between versions");
-		compare.setImageDescriptor(TimTamPlugin.getInstance().loadImageDescriptor(TimTamPlugin.IMG_PAGE));
+		compare.setImageDescriptor(TimTamPlugin.getInstance().loadImageDescriptor(TimTamPlugin.IMG_USER));
 
 		getViewSite().getActionBars().getToolBarManager().add(compare);
 		hookDoubleClickAction();

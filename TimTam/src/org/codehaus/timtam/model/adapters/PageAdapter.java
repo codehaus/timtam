@@ -175,6 +175,10 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 		return getPage().content;
 	}
 
+	public String getContent(long version) throws RemoteException {
+		return service.getPage(version).content;
+	}
+
 	public Date getCreated() throws RemoteException {
 		return getPage().created;
 	}
@@ -357,5 +361,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
         // reparent the moved page
         parent = newParent;
 	}
+
+
 }
 
