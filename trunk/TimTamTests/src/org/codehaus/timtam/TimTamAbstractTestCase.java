@@ -23,6 +23,8 @@ public class TimTamAbstractTestCase extends TestCase{
 	
 	private MockConfluenceServer mockConfServer;
 	private static final String TIMTAM_PERSPECTIVE = "org.codehaus.timtam.perspective.TimTamPerspective";
+	private IWorkbenchWindow activeWorkbenchWindow;
+	private static final String CONFLUENCE_VIEW = "org.codehaus.timtam.views.ConfluenceView";
 
 	/*  
 	 * open the timtam perspective, 
@@ -32,7 +34,7 @@ public class TimTamAbstractTestCase extends TestCase{
 	protected void setUp() throws Exception {
 		mockConfServer = new MockConfluenceServer();
 		
-		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		PlatformUI.getWorkbench().showPerspective(TIMTAM_PERSPECTIVE,activeWorkbenchWindow);
 	}
 
@@ -54,6 +56,6 @@ public class TimTamAbstractTestCase extends TestCase{
 	 * 
 	 */
 	protected ConfluenceView getConfluenceView() {
-		return null;
+		return (ConfluenceView) activeWorkbenchWindow.getActivePage().findView(CONFLUENCE_VIEW);
 	}
 }
