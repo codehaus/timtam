@@ -40,7 +40,6 @@ import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.PageContainer;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.atlassian.confluence.remote.RemotePage;
 import com.atlassian.confluence.remote.RemotePageSummary;
