@@ -89,6 +89,8 @@ class AccountDetails {
 		return url.equals(details.url) && user.equals(details.user) && password.equals(details.password);
 	}
 }
+
+
 public class TimTamModel {
 	private TimTamServiceFactory serviceFactory;
 	private static TimTamModel instance = new TimTamModel();
