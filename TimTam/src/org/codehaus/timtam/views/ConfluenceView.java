@@ -117,7 +117,7 @@ public class ConfluenceView extends ViewPart {
 		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
-//		D&D support on ice pending bug fixes in conf ...
+//		D&D support on ice pending bug fixes in conf - CONF-1091  
 //		Transfer[] transfers = new Transfer[]{TextTransfer.getInstance()};
 //		viewer.addDragSupport(DND.DROP_MOVE , transfers, new ConfluenceDragListner(this));
 //		viewer.addDropSupport(DND.DROP_MOVE , transfers, new ConfluenceDropAdapter(this));
@@ -254,6 +254,7 @@ public class ConfluenceView extends ViewPart {
 		action.setText("Rename Page...");
 		action.setToolTipText("Rename The Selected Page");
 		action.setImageDescriptor(plugin.loadImageDescriptor(TimTamPlugin.IMG_RENAME_PAGE));
+		// rename is disabled due to (another ) bug in conf CONF-974
 		actionList.add(action);
 		return actionList;
 	}
