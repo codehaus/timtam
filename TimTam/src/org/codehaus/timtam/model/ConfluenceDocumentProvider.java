@@ -61,6 +61,23 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 
 
 
+	/**
+	 * @author Sarah
+	 *
+	 * TODO To change the template for this generated type comment go to
+	 * Window - Preferences - Java - Code Style - Code Templates
+	 */
+	private static class ConfluenceDocumet extends Document {
+		
+			/**
+		 * 
+		 */
+		public ConfluenceDocumet() {
+			super();
+			setLineTracker(new ConfluenceLieTracker(this));
+		}
+}
+	
 	private ConfluencePage getPage(Object element) {
 		IEditorInput input = (IEditorInput) element;
 		return (ConfluencePage) input.getAdapter(ConfluencePage.class);
@@ -95,7 +112,7 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 			return info.fDocument;
 		}
 		
-		Document doc = new Document();
+		Document doc = new ConfluenceDocumet();
 			try {
             doc.set(getPage(element).getContent());
         } catch (RemoteException e) {
