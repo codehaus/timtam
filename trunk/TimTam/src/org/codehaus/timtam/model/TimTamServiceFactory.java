@@ -41,13 +41,10 @@ package org.codehaus.timtam.model;
  *
  */
 public class TimTamServiceFactory {
-    private static final String CONFLUENCE_SOAP_EP = "/rpc/soap/confluenceservice-v1.wsdl";
+
 	public ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
 	
-		ConfluenceServiceImpl instance = new ConfluenceServiceImpl();
-	    instance.password = password;
-	    instance.user = user;
-	    instance.server = server.endsWith(".wsdl") ? server : server+ CONFLUENCE_SOAP_EP;
+		ConfluenceServiceImpl instance = new ConfluenceServiceImpl(server, user, password);
 	    instance.connectAndLogin(useProxy);
 	    return instance;
 	}
