@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.editors.SearchResultBrowser;
+import org.codehaus.timtam.editors.search.SearchResultBrowser;
 import org.codehaus.timtam.model.TimTamModel;
 import org.codehaus.timtam.model.search.SearchResult;
 import org.codehaus.timtam.model.search.SearchResultBrowserInput;

@@ -31,7 +31,7 @@
  * 
  *  
  */
-package org.codehaus.timtam.editors;
+package org.codehaus.timtam.editors.space;
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceSpace;
 import org.eclipse.core.runtime.IProgressMonitor;

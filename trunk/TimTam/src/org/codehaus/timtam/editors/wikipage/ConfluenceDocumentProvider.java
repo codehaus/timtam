@@ -36,9 +36,10 @@
 *
 *
 */
-package org.codehaus.timtam.model;
+package org.codehaus.timtam.editors.wikipage;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.model.ConfluencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Document;

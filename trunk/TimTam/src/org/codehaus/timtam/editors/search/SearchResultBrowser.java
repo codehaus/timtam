@@ -31,7 +31,7 @@
  * 
  *  
  */
-package org.codehaus.timtam.editors;
+package org.codehaus.timtam.editors.search;
 
 import org.codehaus.timtam.model.search.SearchResultBrowserInput;
 import org.eclipse.core.runtime.IProgressMonitor;

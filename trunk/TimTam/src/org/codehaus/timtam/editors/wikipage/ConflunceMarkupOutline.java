@@ -36,51 +36,44 @@
 *
 *
 */
+package org.codehaus.timtam.editors.wikipage;
 
-package org.codehaus.timtam.editors;
-
-import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.model.ConfluenceDocumentProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 /**
  * @author zohar melamed
  *
  */
-public class ConflunceMarkupEditor extends AbstractTextEditor{
+public class ConflunceMarkupOutline extends ContentOutlinePage{
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+//		TreeViewer viewer = getTreeViewer();
+//		
+//		viewer.setContentProvider(new ConfluenceMarkupContentProvider());
+//		viewer.setLabelProvider(new GroovyASTLabelProvider());
+//		viewer.addDoubleClickListener(new IDoubleClickListener() {
+//			public void doubleClick(DoubleClickEvent event) {
+//				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+//				TreeAdapter adapter = (TreeAdapter) selection.getFirstElement();
+//				int line = adapter.getLineNumber();
+//				navigateToEditor(line);
+//			}
+//
+//		});
+//		
+//
+	}
+//	private void navigateToEditor(int line) {
+//		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+//		IEditorPart part = page.getActiveEditor();
+//		ITextEditor editor = (ITextEditor) part;
+//		IDocument document= editor.getDocumentProvider().getDocument(part.getEditorInput());
+//		try {
+//			editor.selectAndReveal(document.getLineOffset(line), document.getLineLength(line));
+//		} catch (BadLocationException e) {
+////			GroovyPlugin.getPlugin().logException("failed to navigate to editor line from content outline tree",e);
+//		}
+//	}
 	
-	private ConflunceMarkupOutline contentOutline;
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	public Object getAdapter(Class required) {
-		if (required.equals(IContentOutlinePage.class)) {
-			return contentOutline; 
-		}
-		return super.getAdapter(required);
-	}
-
-	/**
-	 * 
-	 */
-	public ConflunceMarkupEditor() {
-		super();
-		setDocumentProvider(new ConfluenceDocumentProvider());
-		setSourceViewerConfiguration(new ConfluenceSourceViewerConfiguration());
-	}
-	
-	public void createPartControl(Composite parent) {
-		super.createPartControl(parent);
-		setWordWrap();
-	}
-
-	private void setWordWrap() {
-		if (getSourceViewer() != null) {
-			getSourceViewer().getTextWidget().setWordWrap(TimTamPlugin.getInstance().getPreferenceStore().getBoolean(TimTamPlugin.P_USE_WORD_WRAP));
-		}
-	}
-
 }

@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.editors.SpaceEditor;
-import org.codehaus.timtam.editors.TimTamPageEditor;
+import org.codehaus.timtam.editors.space.SpaceEditor;
+import org.codehaus.timtam.editors.wikipage.TimTamPageEditor;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.codehaus.timtam.model.ConfluenceSpace;
 import org.codehaus.timtam.model.TimTamModel;

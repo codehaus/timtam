@@ -45,22 +45,22 @@
       <editor
             name="TimTam Editor"
             icon="icons/page.gif"
-            class="org.codehaus.timtam.editors.TimTamPageEditor"
-            contributorClass="org.codehaus.timtam.editors.TimTamMultiPageEditorContributor"
+            class="org.codehaus.timtam.editors.wikipage.TimTamPageEditor"
+            contributorClass="org.codehaus.timtam.editors.wikipage.TimTamMultiPageEditorContributor"
             id="org.codehaus.timtam.editors.TimTamPageEditor">
       </editor>
       <editor
             name="Space Editor"
             icon="icons/space.gif"
-            contributorClass="org.codehaus.timtam.editors.SpaceEditorContributor"
+            contributorClass="org.codehaus.timtam.editors.space.SpaceEditorContributor"
             class="org.codehaus.timtam.editors.SpaceEditor"
             id="org.codehaus.timtam.editors.SpaceEditor">
       </editor>
       <editor
-            name="Browse Serach Result "
+            class="org.codehaus.timtam.editors.search.SearchResultBrowser"
             icon="icons/search.gif"
             contributorClass="org.eclipse.ui.part.EditorActionBarContributor"
-            class="org.codehaus.timtam.editors.SearchResultBrowser"
+            name="Browse Serach Result "
             id="org.codehaus.timtam.editors.SearchResultBrowser">
       </editor>
    </extension>
@@ -92,7 +92,7 @@
             name="Confluence Navigator"
             icon="icons/list_pages.gif"
             category="org.codehaus.timtam"
-            class="org.codehaus.timtam.views.ConfluenceView"
+            class="org.codehaus.timtam.views.confluencetree.ConfluenceView"
             id="org.codehaus.timtam.views.ConfluenceView">
       </view>
       <view
