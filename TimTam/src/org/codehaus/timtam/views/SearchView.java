@@ -117,6 +117,7 @@ public class SearchView extends ViewPart {
 			imageMap.put("attachment", TimTamPlugin.IMG_ATTACHMENT);
 			imageMap.put("userinfo", TimTamPlugin.IMG_USER);
 			imageMap.put("blogpost", TimTamPlugin.IMG_BLOGENTRY);
+			imageMap.put("mail", TimTamPlugin.IMG_MAIL);
 		}
 		public String getColumnText(Object obj, int index) {
 			SearchResult result = (SearchResult) obj;
@@ -195,7 +196,7 @@ public class SearchView extends ViewPart {
 		getSite().registerContextMenu(menuMgr, viewer);
 	}
 	private void fillContextMenu(IMenuManager manager) {
-		manager.add(search);
+		manager.add(openPage);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
