@@ -39,6 +39,7 @@
 package org.codehaus.timtam.model;
 
 import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteBlogEntry;
 import com.atlassian.confluence.remote.RemoteException;
 
 /**
@@ -53,4 +54,9 @@ public interface ConfluenceSpace {
 	public String getKey();
 	public boolean isReadOnly();
 	public boolean isHealty();
+    /**
+     * @throws RemoteException
+     * 
+     */
+    public RemoteBlogEntry[] getBlogEntries() throws RemoteException;
 }
