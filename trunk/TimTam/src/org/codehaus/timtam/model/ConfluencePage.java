@@ -55,6 +55,7 @@ public interface ConfluencePage {
 	
 	
 	public String getContent() throws RemoteException;
+	public String getContent(long version) throws RemoteException;
 	public String renderContent() throws RemoteException;
 	public String renderContent(String content) throws RemoteException;
 	public void setContent(String content) throws RemoteException;
