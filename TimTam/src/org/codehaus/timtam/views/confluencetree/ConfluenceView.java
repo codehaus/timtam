@@ -101,7 +101,7 @@ import com.atlassian.confluence.remote.RemoteException;
 public class ConfluenceView extends ViewPart {
     TreeViewer viewer;
     DrillDownAdapter drillDownAdapter;
-    TimTamModel model = TimTamModel.getInstace();
+    TimTamModel model = TimTamModel.getInstance();
     public final static String CONFLUENCE_TREEVIEW_ID = "org.codehaus.timtam.views.ConfluenceView";
     private Action refreshNode;
     private Action addServer;

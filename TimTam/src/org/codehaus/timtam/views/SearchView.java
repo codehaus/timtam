@@ -206,7 +206,7 @@ public class SearchView extends ViewPart {
 			public void run() {
 				Collection results = null;
                 try {
-                    results = TimTamModel.getInstace().search(query);
+                    results = TimTamModel.getInstance().search(query);
                 } catch (RemoteException e) {
                     TimTamPlugin plugin = TimTamPlugin.getInstance();
                     plugin.logException("Search failed",e,true);

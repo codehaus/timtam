@@ -148,7 +148,7 @@ public class TimTamModel {
 	/**
 	 * @return
 	 */
-	public static TimTamModel getInstace() {
+	public static TimTamModel getInstance() {
 		return instance;
 	}
 	/**

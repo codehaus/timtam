@@ -108,7 +108,7 @@ public class NewServerConnectionWizard extends Wizard {
 		monitor.setTaskName("Trying to connect to " + server + " ...");
 		monitor.worked(1);
 		try {
- 			TimTamModel.getInstace().addServer(server, user, password, useProxy);
+ 			TimTamModel.getInstance().addServer(server, user, password, useProxy);
 		} catch (Exception e) {
 			final String errorMessage = "Connection to " + server + " failed :\n" + e.getMessage();
 			Display.getDefault().syncExec(new Runnable() {
