@@ -69,7 +69,7 @@
       <page
             name="TimTam"
             class="org.codehaus.timtam.preferences.TimTamPreferencePage"
-            id="org.codehaus.timtam.preferences.TimTamPreferencePage">
+            id="org.codehaus.timtam.preferences.TimTamPreferencePage.Connection">
       </page>
    </extension>
    <extension

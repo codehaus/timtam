@@ -39,7 +39,9 @@
 
 package org.codehaus.timtam.editors;
 
+import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceDocumentProvider;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -68,6 +70,17 @@ public class ConflunceMarkupEditor extends AbstractTextEditor{
 		super();
 		setDocumentProvider(new ConfluenceDocumentProvider());
 		setSourceViewerConfiguration(new ConfluenceSourceViewerConfiguration());
+	}
+	
+	public void createPartControl(Composite parent) {
+		super.createPartControl(parent);
+		setWordWrap();
+	}
+
+	private void setWordWrap() {
+		if (getSourceViewer() != null) {
+			getSourceViewer().getTextWidget().setWordWrap(TimTamPlugin.getInstance().getPreferenceStore().getBoolean(TimTamPlugin.P_USE_WORD_WRAP));
+		}
 	}
 
 }
