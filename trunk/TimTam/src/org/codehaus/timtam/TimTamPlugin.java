@@ -73,7 +73,7 @@ import electric.util.classloader.ClassLoaders;
  * The main plugin class to be used in the desktop.
  */
 public class TimTamPlugin extends AbstractUIPlugin {
-    //The shared instance.
+	//The shared instance.
     private static TimTamPlugin plugin;
     private TemplateStore templateStore;
     //The context type registry.
@@ -115,7 +115,8 @@ public class TimTamPlugin extends AbstractUIPlugin {
     public static final String P_USE_PROXY_FOR_HTTP_AUTH = "use_proxy_settings_for_http_auth";
     public static final String P_HTTP_USER = "http_user";
     public static final String P_HTTP_PASSWORD = "http_password";
-
+	public static final String P_USE_WORD_WRAP = "use_wordwrap";
+	
     private static final String IMG_READONLY_DECORATOR = "icons/readonly-decorator.gif";
     private static final String IMG_READONLY_PAGE = "readonlypage";
     private static final String IMG_READONLY_HOMEPAGE = "readonlyhomepage";
@@ -338,6 +339,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         ClassLoaders.setContextClassLoader(getClass().getClassLoader());
+        getPreferenceStore().setDefault(P_USE_WORD_WRAP,true);
         // workaround for the rcp / non rcp diff in behave
         if (Display.getCurrent() != null) {
             init();

@@ -74,7 +74,7 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 		 */
 		public ConfluenceDocumet() {
 			super();
-			setLineTracker(new ConfluenceLieTracker(this));
+			//setLineTracker(new ConfluenceLieTracker(this));
 		}
 }
 	

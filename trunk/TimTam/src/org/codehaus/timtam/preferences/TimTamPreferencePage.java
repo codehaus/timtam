@@ -75,7 +75,7 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	public TimTamPreferencePage() {
 		super(GRID);
 		setPreferenceStore(TimTamPlugin.getInstance().getPreferenceStore());
-		setDescription("Connection Properties");
+		//setDescription("Connection Properties");
 	}
 
 	/**
@@ -87,6 +87,8 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	public void createFieldEditors() {
 		
 		Composite editorParent = getFieldEditorParent();
+
+		addField(new BooleanFieldEditor(TimTamPlugin.P_USE_WORD_WRAP, "Use Word Wrap?  ", editorParent));
 		
 		proxyHost = new StringFieldEditor(TimTamPlugin.P_PROXY_HOST, "Proxy Host", editorParent);
 		addField(proxyHost);
