@@ -70,9 +70,11 @@ public class BrowserControl extends Composite {
 	ConfluencePage page;
 	private Action back;
 	private Action forward;
-	private boolean backAtDocument = true;
 	private Action stop;
 	private Action refresh;
+	private int navigationCount;
+	private boolean backPressed;
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -92,7 +94,7 @@ public class BrowserControl extends Composite {
 		setLayout(formLayout);
 		ToolBarManager manager = new ToolBarManager(SWT.FLAT);
 		createBrowserToolBar(manager);
-		//			
+			
 		GridData gd = new GridData();
 		gd.grabExcessHorizontalSpace = true;
 		gd.verticalAlignment = GridData.CENTER;
@@ -130,6 +132,16 @@ public class BrowserControl extends Composite {
 				monitor.done();
 				working = false;
 				stop.setEnabled(false);
+				if(backPressed){
+					navigationCount--;
+					backPressed = false;
+				}else{
+					String url = browser.getUrl();
+					if(url.startsWith("http")){// we mive somewhere
+						navigationCount++;
+					}
+				}
+				updateNavigationStatus();
 			}
 		});
 		browser.addStatusTextListener(new StatusTextListener() {
@@ -140,29 +152,34 @@ public class BrowserControl extends Composite {
 		});
 		browser.addLocationListener(new LocationAdapter() {
 			public void changed(LocationEvent event) {
-				back.setEnabled(browser.isBackEnabled() || (!backAtDocument));
-				forward.setEnabled(browser.isForwardEnabled());
-				backAtDocument = false;
+				updateNavigationStatus();
 			}
 		});
 	}
+	/**
+	 * 
+	 */
+	private void updateNavigationStatus() {
+		back.setEnabled(navigationCount > 0);
+		forward.setEnabled(browser.isForwardEnabled());
+	}
+	
 	private void createBrowserToolBar(ContributionManager manager) {
 
 		back = new Action() {
 			public void run() {
-				if (browser.isBackEnabled()) {
+				backPressed = true;
+				if(navigationCount > 1){
 					browser.back();
-					setEnabled(browser.isBackEnabled());
-				} else if (!backAtDocument) {
+				}else{
 					try {
                         browser.setText(page.renderContent());
                     } catch (RemoteException e) {
                         TimTamPlugin.getInstance().logException("failed to get page content",e,true);
                     }
-					backAtDocument = true;
-					setEnabled(false);
 				}
-				forward.setEnabled(browser.isForwardEnabled());
+				
+				updateNavigationStatus() ;
 			}
 		};
 		back.setToolTipText("Back");
@@ -173,8 +190,7 @@ public class BrowserControl extends Composite {
 		forward = new Action() {
 			public void run() {
 				browser.forward();
-				setEnabled(browser.isForwardEnabled());
-				back.setEnabled(browser.isBackEnabled());
+				updateNavigationStatus();
 			}
 		};
 		forward.setToolTipText("Forward");
@@ -184,6 +200,7 @@ public class BrowserControl extends Composite {
 		stop = new Action() {
 			public void run() {
 				browser.stop();
+				backPressed = false;
 			}
 		};
 		stop.setToolTipText("Stop");
@@ -192,7 +209,7 @@ public class BrowserControl extends Composite {
 		manager.add(stop);
 		refresh = new Action() {
 			public void run() {
-				if (backAtDocument) {
+				if (navigationCount == 0){
 					page.refresh();
 					try {
                         browser.setText(page.renderContent());
@@ -215,8 +232,6 @@ public class BrowserControl extends Composite {
 	 */
 	public void setText(String text) {
 		browser.setText(text);
-		backAtDocument = true;
-		back.setEnabled(false);
-		forward.setEnabled(browser.isForwardEnabled());
+		updateNavigationStatus();
 	}
 }
