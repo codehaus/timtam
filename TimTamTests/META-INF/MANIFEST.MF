@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-Name: TimTamTests Plug-in
+Bundle-SymbolicName: org.codehaus.timtam.tests
+Bundle-Version: 1.0.0
+Bundle-ClassPath: TimTamTests.jar
+Bundle-Localization: plugin
+Eclipse-AutoStart: true
+Require-Bundle: org.codehaus.timtam
