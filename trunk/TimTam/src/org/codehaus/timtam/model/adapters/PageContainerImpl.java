@@ -142,7 +142,7 @@ class PageContainerImpl implements PageContainer {
 	 *      at the moment...
 	 */
 	public void transferPages(Object[] pagesToMove, boolean move, IProgressMonitor monitor) throws RemoteException {
-		monitor.beginTask("Transfering Pages ", pagesToMove.length);
+	    monitor.beginTask("Transfering Pages ", pagesToMove.length);
 		for (int i = 0; i < pagesToMove.length; i++) {
 			PageAdapter pageToMove = (PageAdapter) pagesToMove[i];
 			monitor.setTaskName("Moving " + pageToMove.getName());
@@ -151,25 +151,10 @@ class PageContainerImpl implements PageContainer {
 				GUIUtil.safeWarn("Invalid Page Tranfer", "Pages Can Only Be Moved Within a Space");
 				return;
 			}
-			// set new parent and save
-			long expectedParent = 0;
-			if (pageAdapter != null) {
-				System.out.println("moving page "+pageToMove.getName()+" from parent "+pageToMove.getPage().parentId +" to parent "+pageAdapter.getId());
-				expectedParent = pageAdapter.getId();
-				pageToMove.getPage().parentId = pageAdapter.getId();
-			} else {
-				pageToMove.getPage().parentId = 0;
-			}
-			
-			pageToMove.save();
-			System.out.println("expected parent "+expectedParent+" actual parent "+pageToMove.getParentId());
-			// adjust tree model to reflect change
-			if (pageToMove.parent != null) {
-				pageToMove.parent.childPages.removePage(pageToMove);
-			} else {
-				pageToMove.space.removePage(pageToMove);
-			}
+
+			pageToMove.reparent(pageAdapter);
 			pages.add(pageToMove);
+
 			monitor.worked(1);
 		}
 		monitor.done();

@@ -336,5 +336,24 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	}
 	
 
+	public void reparent(PageAdapter newParent) throws NotPermittedException, RemoteException{
+	    // first change confluence
+	    // set new parent and save refelcting  
+        if (newParent!= null) {
+        	System.out.println("moving page "+getName()+" from parent "+getPage().parentId +" to parent "+newParent.getId());
+        	getPage().parentId = newParent.getId();
+        } else {
+        	getPage().parentId = 0;
+        }
+        
+        save();
+        // now update our local model
+        // adjust tree model to reflect change
+        if (parent != null) {
+        	parent.removePage(this);
+        } 
+        // reparent the moved page
+        parent = newParent;
+	}
 }
 
