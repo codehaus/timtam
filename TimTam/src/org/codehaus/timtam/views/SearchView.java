@@ -162,11 +162,11 @@ public class SearchView extends ViewPart {
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new NameSorter());
-		viewer.setInput(getViewSite());
 		
 		TableColumn column = new TableColumn(viewer.getTable(), SWT.LEFT);
 		column.setText("Title");
 		column.setWidth(150);
+		viewer.setInput(getViewSite());
 
 		column = new TableColumn(viewer.getTable(), SWT.LEFT);
 		column.setText("Excerpt");
