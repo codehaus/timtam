@@ -40,17 +40,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.model.*;
 import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.ConfluenceSpace;
+import org.codehaus.timtam.model.PageContainer;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IPersistableElement;
 
 import com.atlassian.confluence.remote.RemotePageSummary;
 import com.atlassian.confluence.remote.RemoteSpace;
@@ -59,7 +63,7 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  * @author zohar melamed
  *  
  */
-public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContainer{
+public class SpaceAdapter implements ConfluenceSpace, IEditorInput, TreeAdapter , PageContainer{
 	private RemoteSpaceSummary spaceSummary;
 	private RemoteSpace space;
 	private ServerAdapter parent;
@@ -68,7 +72,7 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContaine
 	private ConfluenceService service;
 	private boolean spaceOk = true;
 	private boolean pagesLoaded;
-	private boolean readOnly = true;
+	private boolean readOnly;
 	/**
 	 * @param spaceSummary
 	 */
@@ -78,6 +82,15 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContaine
 		this.parent = parent;
 		this.spaceSummary = spaceSummary;
 		childPages = new PageContainerImpl(service, this, null);
+	}
+	
+	public void refresh(IProgressMonitor monitor) {
+		parentToChildPageMap.clear();
+		childPages.clear();
+		spaceOk = false;
+		readOnly = true;
+		space = service.getSpace(spaceSummary.key);
+		monitor.setTaskName("Loading Space " + spaceSummary.name);
 		String[] permissions = service.getPermissions(spaceSummary.key);
 		for (int i = 0; i < permissions.length; i++) {
 			String permission = permissions[i];
@@ -85,12 +98,7 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContaine
 				readOnly = false;
 			}
 		}
-	}
-	public void refresh(IProgressMonitor monitor) {
-		parentToChildPageMap.clear();
-		childPages.clear();
-		spaceOk = false;
-		monitor.setTaskName("Loading Space " + spaceSummary.name);
+		
 		space = service.getSpace(spaceSummary.key);
 		monitor.subTask("Getting Pages ...");
 		try {
@@ -213,10 +221,80 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContaine
 		}
 		return false;
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[], boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
 		childPages.transferPages(pagesToCopy, move, monitor);
+	}
+	
+	
+	///////// EditorInput 
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IEditorInput#exists()
+	 */
+	public boolean exists() {
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IEditorInput#getImageDescriptor()
+	 */
+	public ImageDescriptor getImageDescriptor() {
+		final Image image = TimTamPlugin.getInstance().getSpaceIcon(this);
+		return new ImageDescriptor(){
+			public ImageData getImageData() {
+				return image.getImageData();
+			}
+		};
+	}	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IEditorInput#getName()
+	 */
+	public String getName() {
+		return getText();
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IEditorInput#getPersistable()
+	 */
+	public IPersistableElement getPersistable() {
+		return null;
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IEditorInput#getToolTipText()
+	 */
+	public String getToolTipText() {
+		return getName();
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter == ConfluenceSpace.class)
+			return this;
+		
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.ConfluenceSpace#getDescription()
+	 */
+	public String getDescription() {
+		return space.description;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.ConfluenceSpace#getUrl()
+	 */
+	public String getUrl() {
+		return space.url;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.ConfluenceSpace#getKey()
+	 */
+	public String getKey() {
+		return space.key;
 	}
 }

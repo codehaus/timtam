@@ -25,6 +25,7 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.ui.forms"/>
    </requires>
 
 
@@ -43,10 +44,23 @@
       <editor
             name="TimTam Editor"
             icon="icons/page.gif"
-            extensions="conf"
-            contributorClass="org.codehaus.timtam.editors.TimTamMultiPageEditorContributor"
             class="org.codehaus.timtam.editors.TimTamPageEditor"
+            contributorClass="org.codehaus.timtam.editors.TimTamMultiPageEditorContributor"
             id="org.codehaus.timtam.editors.TimTamPageEditor">
+      </editor>
+      <editor
+            name="Space Editor"
+            icon="icons/space.gif"
+            contributorClass="org.codehaus.timtam.editors.SpaceEditorContributor"
+            class="org.codehaus.timtam.editors.SpaceEditor"
+            id="org.codehaus.timtam.editors.SpaceEditor">
+      </editor>
+      <editor
+            name="Browse Serach Result "
+            icon="icons/search.gif"
+            contributorClass="org.codehaus.timtam.editors.NOOPContributor"
+            class="org.codehaus.timtam.editors.SearchResultBrowser"
+            id="org.codehaus.timtam.editors.SearchResultBrowser">
       </editor>
    </extension>
    <extension
@@ -62,23 +76,37 @@
       <page
             objectClass="org.eclipse.core.resources.IFile"
             name="Confluence Properties"
-            nameFilter="*.*"
             class="org.codehaus.timtam.properties.TimTamPropertyPage"
+            nameFilter="*.*"
             id="org.codehaus.timtam.properties.samplePropertyPage">
       </page>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <category
-            name="Confluence"
-            id="TimTam">
+            name="TimTam"
+            id="org.codehaus.timtam">
       </category>
       <view
             name="Confluence"
-            icon="icons/space.gif"
-            category="TimTam"
+            icon="icons/list_pages.gif"
+            category="org.codehaus.timtam"
             class="org.codehaus.timtam.views.ConfluenceView"
             id="org.codehaus.timtam.views.ConfluenceView">
+      </view>
+      <view
+            name="Search"
+            icon="icons/page.gif"
+            category="org.codehaus.timtam"
+            class="org.codehaus.timtam.views.SearchView"
+            id="org.codehaus.timtam.views.SearchView">
+      </view>
+      <view
+            name="Versions"
+            icon="icons/history.gif"
+            category="org.codehaus.timtam"
+            class="org.codehaus.timtam.views.VersionsView"
+            id="org.codehaus.timtam.views.VersionsView">
       </view>
    </extension>
    <extension

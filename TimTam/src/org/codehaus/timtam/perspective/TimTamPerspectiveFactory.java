@@ -41,6 +41,8 @@
 package org.codehaus.timtam.perspective;
 
 import org.codehaus.timtam.views.ConfluenceView;
+import org.codehaus.timtam.views.SearchView;
+import org.codehaus.timtam.views.VersionsView;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -59,12 +61,19 @@ public class TimTamPerspectiveFactory implements IPerspectiveFactory {
 	 * @see IPerspectiveFactory#createInitialLayout
 	 */
 	public void createInitialLayout(IPageLayout layout)  {
+		layout.addShowViewShortcut(ConfluenceView.CONFLUENCE_TREEVIEW_ID);
+		layout.addShowViewShortcut(SearchView.CONFLUENCE_SEARCHVIEW_ID);
+		
 		// Editors are placed for free.
 		String editorArea = layout.getEditorArea();
 
 		// Top left.
 		IFolderLayout topLeft = layout.createFolder("topLeft", IPageLayout.LEFT, (float)0.26, editorArea);//$NON-NLS-1$
 		topLeft.addView(ConfluenceView.CONFLUENCE_TREEVIEW_ID);
+		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.80,//$NON-NLS-1$
+		editorArea);//$NON-NLS-1$
 		
+		bottom.addView(SearchView.CONFLUENCE_SEARCHVIEW_ID);		
+		bottom.addView(VersionsView.CONFLUENCE_VERSIONSVIEW_ID);		
 	}
 }

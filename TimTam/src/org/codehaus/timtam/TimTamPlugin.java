@@ -91,11 +91,16 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	public static final String IMG_DEL_SERVER= "icons/delServer.gif";
 	public static final String IMG_ADD_PAGE= "icons/addPage.gif";
 	public static final String IMG_ADD_CHILD_PAGE= "icons/addChildPage.gif";
+	public static final String IMG_COMMENT = "icons/comment.gif";
+	public static final String IMG_ATTACHMENT = "icons/attachement.gif";
+	public static final String IMG_USER = "icons/user.gif";
+	public static final String IMG_BLOGENTRY = "icons/blogentry.gif";
 	public static final String IMG_RENAME_PAGE= "icons/renamePage.gif";
 	public static final String IMG_REFRESH = "icons/refresh.gif";
 	public static final String IMG_SERVER = "icons/server.gif";
 	public static final String IMG_ADDSERVER= "icons/addServer.gif";
 	public static final String IMG_REFRESH_NODE = "icons/refreshServer.gif";
+	public static final String IMG_SEARCH = "icons/search.gif";
 	// browser
 	public static final String IMG_BROWSER_FORWARD = "icons/forward.gif";
 	public static final String IMG_BROWSER_BACK= "icons/back.gif";
@@ -115,6 +120,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	private static final String IMG_READONLY_SPACE = "readonlyspace"; 
 
 	private static final String CUSTOM_TEMPLATES_KEY= "org.codehaus.timtam.customtemplates"; //$NON-NLS-1$
+
 
 
 	static {
@@ -227,12 +233,18 @@ public class TimTamPlugin extends AbstractUIPlugin {
 		registry.put(IMG_BROKEN_SPACE, loadImage(IMG_BROKEN_SPACE));
 		registry.put(IMG_SPACEHOME, loadImage(IMG_SPACEHOME));
 		registry.put(IMG_REFRESH, loadImage(IMG_REFRESH));
+		registry.put(IMG_COMMENT ,loadImage(IMG_COMMENT));
+		registry.put(IMG_ATTACHMENT,loadImage(IMG_ATTACHMENT));
+		registry.put(IMG_USER,loadImage(IMG_USER));
+		registry.put(IMG_BLOGENTRY,loadImage(IMG_BLOGENTRY));
+		
 
+		
 		registry.put(IMG_BROWSER_FORWARD,loadImageDescriptor(IMG_BROWSER_FORWARD));
 		registry.put(IMG_BROWSER_BACK,loadImageDescriptor(IMG_BROWSER_BACK));
 		registry.put(IMG_BROWSER_STOP,loadImageDescriptor(IMG_BROWSER_STOP));
 		registry.put(IMG_BROWSER_REFRESH,loadImageDescriptor(IMG_BROWSER_REFRESH));
-
+		registry.put(IMG_SEARCH, loadImageDescriptor(IMG_SEARCH));
 		
 		
 		ImageDescriptor readOnlyOverlay = loadImageDescriptor(IMG_READONLY_DECORATOR);		
