@@ -182,6 +182,8 @@ public class BrowserControl extends Composite {
 		};
 		stop.setToolTipText("Stop");
 		stop.setImageDescriptor(imageRegistry.getDescriptor(TimTamPlugin.IMG_BROWSER_STOP));
+		manager.add(stop);
+		
 		Action refresh = new Action() {
 			public void run() {
 				browser.refresh();
