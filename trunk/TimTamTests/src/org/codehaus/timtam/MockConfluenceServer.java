@@ -34,7 +34,7 @@ import com.atlassian.confluence.remote.VersionMismatchException;
  */
 public class MockConfluenceServer implements IConfluenceSoapService {
 
-	private List spaces = ;
+	
 	/* (non-Javadoc)
 	 * @see com.atlassian.confluence.remote.IConfluenceSoapService#getPermissions(java.lang.String, java.lang.String)
 	 */
