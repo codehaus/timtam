@@ -114,7 +114,7 @@ public class TimTamModel {
 		accountDetails.add(details);
 	}
 	private ServerAdapter addServer(AccountDetails account) throws LoginFailureException {
-		ConfluenceService service = ConfluenceService.getService(account.url, account.user, account.password,account.useProxy);
+		ConfluenceService service = TimTamModelFactory.getService(account.url, account.user, account.password,account.useProxy);
 		final ServerAdapter adapter = new ServerAdapter(account.url, account.user , service);
 		adapterToAccountDetails.put(adapter, account);
 		serverAdapters.add(adapter);
