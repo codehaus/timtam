@@ -58,6 +58,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteBlogEntry;
+import com.atlassian.confluence.remote.RemoteBlogEntrySummary;
 import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePageSummary;
 import com.atlassian.confluence.remote.RemoteSpace;
@@ -350,6 +352,20 @@ public class SpaceAdapter implements ConfluenceSpace, IEditorInput,
      * @see org.codehaus.timtam.model.ConfluenceSpace#getKey()
      */
     public String getKey() {
-        return space.key;
+        return spaceSummary.key;
+    }
+
+    /* (non-Javadoc)
+     * @see org.codehaus.timtam.model.ConfluenceSpace#getBlogEntries()
+     */
+    public RemoteBlogEntry[] getBlogEntries() throws RemoteException {
+        RemoteBlogEntrySummary[] blogEntriesSummaries = service.getBlogEntries(spaceSummary.key);
+        RemoteBlogEntry[] blogEntries = new RemoteBlogEntry[blogEntriesSummaries.length];
+        for (int i = 0; i < blogEntriesSummaries.length; i++) {
+            RemoteBlogEntrySummary summary = blogEntriesSummaries[i];
+            blogEntries[i] = service.getBlogEntry(summary.id);
+        }
+        
+        return blogEntries;
     }
 }
