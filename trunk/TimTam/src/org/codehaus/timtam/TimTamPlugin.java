@@ -100,6 +100,7 @@ public class TimTamPlugin extends AbstractUIPlugin {
     public static final String IMG_ADDSERVER = "icons/addServer.gif";
     public static final String IMG_REFRESH_NODE = "icons/refreshServer.gif";
     public static final String IMG_SEARCH = "icons/search.gif";
+	public static final Object IMG_MAIL = "icons/mail.gif";
     // browser
     public static final String IMG_BROWSER_FORWARD = "icons/forward.gif";
     public static final String IMG_BROWSER_BACK = "icons/back.gif";
