@@ -51,6 +51,7 @@ import org.codehaus.timtam.model.adapters.TreeAdapter;
 import org.codehaus.timtam.util.GUIUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -85,6 +86,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
@@ -102,6 +104,9 @@ public class ConfluenceView extends ViewPart {
     private Action addServer;
     TimTamPlugin plugin;
     private Map actionsMap = new HashMap();
+    private IStructuredSelection selectedPages;
+    private IAction pasteAction;
+    private IAction cutAction;
 
     class NameSorter extends ViewerSorter {
     }
@@ -213,6 +218,29 @@ public class ConfluenceView extends ViewPart {
         actionsMap.put(TreeAdapter.SPACE, actions);
         actions = makeServerActions();
         actionsMap.put(TreeAdapter.SERVER, actions);
+
+        cutAction = new Action() {
+                    public void run() {
+                        selectedPages = (IStructuredSelection) viewer.getSelection();
+                        if(selectedPages != null){
+                            pasteAction.setEnabled(true); 
+                        }
+                    }
+                };
+        getViewSite().getActionBars().setGlobalActionHandler(
+                ActionFactory.CUT.getId(), cutAction);
+
+        pasteAction = new Action() {
+            public void run() {
+                doDragAndDrop(getSelectedNode(), selectedPages, DND.DROP_MOVE);
+                pasteAction.setEnabled(false);
+            }
+        };
+
+        pasteAction.setEnabled(false);
+        getViewSite().getActionBars().setGlobalActionHandler(
+                ActionFactory.PASTE.getId(), pasteAction);
+
     }
 
     protected TreeAdapter getSelectedNode() {
