@@ -70,7 +70,19 @@ public class ConfluenceServiceImpl implements ConfluenceService {
     protected String password;
     private long lastLogin;
     private static final long SEESION_EXPIRY = 3 * 60000;
+    private static final String CONFLUENCE_SOAP_EP = "/rpc/soap/confluenceservice-v1.wsdl";
+    
+	/**
+	 * @param server
+	 * @param user
+	 * @param password
+	 */
+	public ConfluenceServiceImpl(String server, String user, String password) {
+		this.user = user;
+		this.password = password;
+	    this.server = server.endsWith(".wsdl") ? server : server+ CONFLUENCE_SOAP_EP;
 
+	}
     /**
      * renew our session token every SEESION_EXPIRY msc
      */
