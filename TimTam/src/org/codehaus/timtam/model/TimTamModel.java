@@ -249,4 +249,12 @@ public class TimTamModel {
 	public ServerAdapter[] getServers() {
 		return (ServerAdapter[]) serverAdapters.toArray(new ServerAdapter[serverAdapters.size()]);
 	}
+	
+	public void setServiceFactory(TimTamServiceFactory serviceFactory) {
+		this.serviceFactory = serviceFactory;
+	}
+	public TimTamServiceFactory getServiceFactory() {
+		return this.serviceFactory;
+	}
+	
 }

@@ -46,9 +46,9 @@ public class TimTamServiceFactory {
 
 	public ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
 	
-		ConfluenceServiceImpl instance = new ConfluenceServiceImpl(server, user, password);
-	    instance.connectAndLogin(useProxy);
-	    return instance;
+		ConfluenceServiceImpl service = new ConfluenceServiceImpl(server, user, password);
+	    service.connectAndLogin(useProxy);
+	    return service;
 	}
 
 }

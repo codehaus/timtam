@@ -6,7 +6,10 @@
  */
 package org.codehaus.timtam;
 
+import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.ConfluenceSpace;
+import org.codehaus.timtam.model.TimTamModel;
+import org.codehaus.timtam.model.TimTamServiceFactory;
 import org.codehaus.timtam.views.confluencetree.ConfluenceView;
 import org.easymock.MockControl;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -20,6 +23,18 @@ import org.eclipse.jface.viewers.TreeViewer;
  */
 public class SpaceViewTestCase extends TimTamAbstractTestCase {
 	public void testViewDisplaysSpacesInTree() {
+
+		
+		
+		// Hacky way of pushing in a mock...
+		TimTamServiceFactory original = TimTamModel.getInstance().getServiceFactory();
+		TimTamModel.getInstance().setServiceFactory(new TimTamServiceFactory(){
+			public ConfluenceService getService(String server, String user,String password, boolean useProxy) throws LoginFailureException {
+				// return mock of ConfluenceService
+				return getMockConfServer();
+			}
+		});
+		
 		///setup 
 		MockControl control = MockControl.createControl(ConfluenceSpace.class);
 		ConfluenceSpace mockSpace = (ConfluenceSpace) control.getMock();
@@ -29,6 +44,8 @@ public class SpaceViewTestCase extends TimTamAbstractTestCase {
 		control.replay();
 		//test
 		getMockConfServer().addSpace(mockSpace);
+
+		
 		ConfluenceView confluenceView = getConfluenceView();
 		TreeViewer confTree = (TreeViewer) confluenceView.getViewer();
 		Object[] expandedElements = confTree.getExpandedElements();
@@ -36,6 +53,9 @@ public class SpaceViewTestCase extends TimTamAbstractTestCase {
 		
 		//verify 
 		control.verify();
+
+		// you want to do this in a teardown
+		TimTamModel.getInstance().setServiceFactory(original);
 	}
 
 }
