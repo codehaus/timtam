@@ -79,11 +79,7 @@ public class PageAdapter implements IEditorInput, ConfluencePage ,TreeAdapter,Pa
 	/**
 	 * @param spaceSummary
 	 */
-	public PageAdapter(
-		RemotePageSummary pageSummary,
-		SpaceAdapter spaceAdapter,
-		PageAdapter parentPage,
-		ConfluenceService service) {
+	public PageAdapter(RemotePageSummary pageSummary, SpaceAdapter spaceAdapter, PageAdapter parentPage, ConfluenceService service) {
 		
 		space = spaceAdapter;
 		parent = parentPage;
