@@ -45,6 +45,8 @@ import org.codehaus.timtam.TimTamPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -66,11 +68,15 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	private StringFieldEditor proxyPort;
 	private StringFieldEditor proxyUser;
 	private StringFieldEditor proxyPasssword;
+	private BooleanFieldEditor useHttpAuth;
+	private StringFieldEditor httpUser;
+	private StringFieldEditor httpPassword;
+	private BooleanFieldEditor useProxySettings;
 
 	public TimTamPreferencePage() {
 		super(GRID);
 		setPreferenceStore(TimTamPlugin.getInstance().getPreferenceStore());
-		setDescription("Confluence Server Properties");
+		setDescription("Connection Properties");
 	}
 
 	/**
@@ -80,20 +86,72 @@ public class TimTamPreferencePage extends FieldEditorPreferencePage implements I
 	 */
 
 	public void createFieldEditors() {
-		useProxy = new BooleanFieldEditor(TimTamPlugin.P_USE_PROXY, "Use Proxy Server ? ", getFieldEditorParent());
+		
+		Composite editorParent = getFieldEditorParent();
+		useProxy = new BooleanFieldEditor(TimTamPlugin.P_USE_PROXY, "Use Proxy Server ? ", editorParent);
+		useProxy.setPreferenceName("TimTamPlugin.P_USE_PROXY");
 		addField(useProxy);
-		proxyHost = new StringFieldEditor(TimTamPlugin.P_PROXY_HOST, "Proxy Host", getFieldEditorParent());
+		proxyHost = new StringFieldEditor(TimTamPlugin.P_PROXY_HOST, "Proxy Host", editorParent);
 		addField(proxyHost);
-		proxyPort = new StringFieldEditor(TimTamPlugin.P_PROXY_PORT, "Proxy Port", getFieldEditorParent());
+		proxyPort = new StringFieldEditor(TimTamPlugin.P_PROXY_PORT, "Proxy Port", editorParent);
 		addField(proxyPort);
-		proxyUser = new StringFieldEditor(TimTamPlugin.P_PROXY_USER, "Proxy User Name", getFieldEditorParent());
+		proxyUser = new StringFieldEditor(TimTamPlugin.P_PROXY_USER, "Proxy User Name", editorParent);
 		addField(proxyUser);
-		proxyPasssword = new StringFieldEditor(TimTamPlugin.P_PROXY_PASSWORD, "Proxy Password", getFieldEditorParent());
+		proxyPasssword = new StringFieldEditor(TimTamPlugin.P_PROXY_PASSWORD, "Proxy Password", editorParent);
+		proxyPasssword.getTextControl(editorParent).setEchoChar('*');
 		addField(proxyPasssword);
+		
+		setProxyFieldsState(editorParent);
+		
+		useHttpAuth = new BooleanFieldEditor(TimTamPlugin.P_USE_HTTP_AUTH, "Use HTTP Authentication?  ", editorParent);
+		addField(useHttpAuth);
+		useProxySettings = new BooleanFieldEditor(TimTamPlugin.P_USE_PROXY_FOR_HTTP_AUTH, "Use Proxy User/Password?  ", editorParent);
+		addField(useProxySettings);
+		httpUser = new StringFieldEditor(TimTamPlugin.P_HTTP_USER, "HTTP User", editorParent);
+		addField(httpUser);
+		httpPassword = new StringFieldEditor(TimTamPlugin.P_HTTP_PASSWORD, "HTTP Password", editorParent);
+		httpPassword.getTextControl(editorParent).setEchoChar('*');
+		addField(httpPassword);
+		
+		setHttpFieldsState(editorParent);
 	}
 
 	public void init(IWorkbench workbench) {
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		super.propertyChange(event);
+		Object source = event.getSource();
+		Composite editorParent = getFieldEditorParent();
+		if(source == useProxy){
+			setProxyFieldsState(editorParent);
+		}else if(source == useHttpAuth || source == useProxySettings){
+			setHttpFieldsState(editorParent);
+		}
+	}
 
+	/**
+	 * @param editorParent
+	 */
+	private void setHttpFieldsState(Composite editorParent) {
+		boolean httpAuthEnabled = useHttpAuth.getBooleanValue();
+		boolean enabled = httpAuthEnabled && (! useProxySettings.getBooleanValue());
+		httpPassword.setEnabled(enabled,editorParent);
+		httpUser.setEnabled(enabled,editorParent);
+	    useProxySettings.setEnabled(httpAuthEnabled, editorParent);
+	}
 
+	/**
+	 * @param editorParent
+	 */
+	private void setProxyFieldsState(Composite editorParent) {
+		boolean enabled = useProxy.getBooleanValue();
+		proxyHost.setEnabled(enabled,editorParent);
+		proxyPasssword.setEnabled(enabled,editorParent);
+		proxyPort.setEnabled(enabled,editorParent);
+		proxyUser.setEnabled(enabled,editorParent);
+	}
+	
 }

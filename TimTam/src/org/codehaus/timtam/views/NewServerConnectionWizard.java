@@ -42,7 +42,6 @@ package org.codehaus.timtam.views;
 import java.lang.reflect.InvocationTargetException;
 
 import org.codehaus.timtam.TimTamPlugin;
-import org.codehaus.timtam.model.LoginFailureException;
 import org.codehaus.timtam.model.TimTamModel;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -108,8 +107,8 @@ public class NewServerConnectionWizard extends Wizard {
 		monitor.setTaskName("Trying to connect to " + server + " ...");
 		monitor.worked(1);
 		try {
-			TimTamModel.getInstace().addServer(server, user, password);
-		} catch (LoginFailureException e) {
+ 			TimTamModel.getInstace().addServer(server, user, password);
+		} catch (Exception e) {
 			final String errorMessage = "Connection to " + server + " failed :\n" + e.getMessage();
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
@@ -117,7 +116,7 @@ public class NewServerConnectionWizard extends Wizard {
 				}
 
 			});
-			TimTamPlugin.getInstance().logException("failed to add a connection to " + server, e);
+			TimTamPlugin.getInstance().logException("failed to add a connection to " + server, e, true);
 			throw new InvocationTargetException(e);
 		}
 	}

@@ -41,6 +41,7 @@
 
 package org.codehaus.timtam.editors;
 
+import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -64,6 +65,8 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import com.atlassian.confluence.remote.RemoteException;
 
 /**
  * An example showing how to create a multi-page editor. This example has 3
@@ -131,7 +134,11 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 		// make sure the document is in synch with the page  
 		IDocumentProvider provider = editor.getDocumentProvider();
 		IDocument document = provider.getDocument(editor.getEditorInput());
-		document.set(page.getContent());
+		try {
+            document.set(page.getContent());
+        } catch (RemoteException e) {
+            TimTamPlugin.getInstance().logException("page getcontent failed in dispose",e,false);
+        }
 		super.dispose();
 	}
 	/**
@@ -165,7 +172,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException {
 		super.init(site, editorInput);
 		page = (ConfluencePage) editorInput.getAdapter(ConfluencePage.class);
-		setTitle(page.getTitle());
+		setPartName(page.getTitle());
 	}
 	/*
 	 * (non-Javadoc) Method declared on IEditorPart.
@@ -187,7 +194,11 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 				return;
 			}
 			
-			browser.setText(page.renderContent(document.get()));
+			try {
+                browser.setText(page.renderContent(document.get()));
+            } catch (RemoteException e) {
+                TimTamPlugin.getInstance().logException("render page failed",e,false);
+            }
 			needsRendering = false;
 		}
 	}

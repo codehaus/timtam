@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/glue-all.jar"/>
+	<classpathentry kind="src" path="src/"/>
+	<classpathentry kind="lib" path="lib/glue.jar"/>
 	<classpathentry kind="lib" path="lib/glue-config.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-0.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-SNAPSHOT.jar"/>

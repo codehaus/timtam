@@ -38,6 +38,7 @@
 */
 package org.codehaus.timtam.model;
 
+import org.codehaus.timtam.TimTamPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Document;
@@ -45,8 +46,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.editors.text.WorkspaceOperationRunner;
 import org.eclipse.ui.texteditor.AbstractDocumentProvider;
+
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
 
 /**
  * @author MelamedZ
@@ -56,7 +59,6 @@ import org.eclipse.ui.texteditor.AbstractDocumentProvider;
  */
 public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 
-	private final WorkspaceOperationRunner runner = new WorkspaceOperationRunner();
 
 
 	private ConfluencePage getPage(Object element) {
@@ -94,20 +96,33 @@ public class ConfluenceDocumentProvider extends AbstractDocumentProvider {
 		}
 		
 		Document doc = new Document();
-		doc.set(getPage(element).getContent());
+			try {
+            doc.set(getPage(element).getContent());
+        } catch (RemoteException e) {
+            TimTamPlugin.getInstance().logException("Failed to load page ",e, true);
+        }
 		
 		return doc;
 	}
 
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite){
 		ConfluencePage page = getPage(element);
-		page.setContent(document.get());
-		page.save();
+		TimTamPlugin plugin = TimTamPlugin.getInstance();
+		try {		
+		    page.setContent(document.get());
+            page.save();
+        } catch (NotPermittedException e) {
+            plugin.logException("You are not allowed to save this page",e, true);
+        } catch (RemoteException e) {
+            plugin.logException("Error saving page",e, true);
+        }
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#getOperationRunner(org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	protected IRunnableContext getOperationRunner(IProgressMonitor monitor) {
-		return runner;
+		return null;
 	}
-	
 
 }

@@ -47,6 +47,7 @@ import org.codehaus.timtam.model.SearchResult;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemoteSearchResult;
 import com.atlassian.confluence.remote.RemoteSpaceSummary;
 
@@ -77,7 +78,7 @@ public class ServerAdapter implements TreeAdapter {
 			spaceSummaries = service.getSpaces();
 			spaces.clear();
 		} catch (Exception e) {
-			TimTamPlugin.getInstance().logException("failed to get spaces", e);
+			TimTamPlugin.getInstance().logException("failed to get spaces", e, true);
 			return;
 		}
 		monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
@@ -92,7 +93,7 @@ public class ServerAdapter implements TreeAdapter {
 		monitor.done();
 	}
 	
-	public void refresh(IProgressMonitor monitor) {
+	public void refresh(IProgressMonitor monitor) throws RemoteException {
 		RemoteSpaceSummary[] spaceSummaries = null;
 		try {
 			monitor.setTaskName("Retrieving  Spaces...");
@@ -100,7 +101,7 @@ public class ServerAdapter implements TreeAdapter {
 			spaces.clear();
 			monitor.beginTask("Loading "+spaceSummaries.length+" Spaces",spaceSummaries.length);
 		} catch (Exception e) {
-			TimTamPlugin.getInstance().logException("failed to get spaces", e);
+			TimTamPlugin.getInstance().logException("failed to get spaces", e, true);
 			return;
 		}
 
@@ -139,8 +140,9 @@ public class ServerAdapter implements TreeAdapter {
 
 	/**
 	 * @param searchTerm
+	 * @throws RemoteException
 	 */
-	public SearchResult[] search(String query) {
+	public SearchResult[] search(String query) throws RemoteException {
 		RemoteSearchResult[] remoteResults = service.search(query,100);
 		SearchResult[] results = new SearchResult[remoteResults.length];
 		for (int i = 0; i < results.length; i++) {

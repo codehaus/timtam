@@ -39,6 +39,10 @@
 
 package org.codehaus.timtam.editors;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.codehaus.timtam.template.ConfluenceCompletionProcessor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -58,6 +62,15 @@ public class CompositeCompletionProcessor implements IContentAssistProcessor{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	private Map assists = new HashMap();
+	
+	/**
+	 * 
+	 */
+	public CompositeCompletionProcessor() {
+		assists.put(new Character('{'),new ConfluenceCompletionProcessor());
+	}
+	
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		// find out which processor contributed the chars , and agg proposals
 		IDocument document= viewer.getDocument();

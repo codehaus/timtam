@@ -34,18 +34,17 @@
 package org.codehaus.timtam.views;
 import java.util.Collection;
 import java.util.HashMap;
+
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.editors.SearchResultBrowser;
 import org.codehaus.timtam.model.SearchResult;
+import org.codehaus.timtam.model.SearchResultBrowserInput;
 import org.codehaus.timtam.model.TimTamModel;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -60,28 +59,27 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+
+import com.atlassian.confluence.remote.RemoteException;
+
+
+
 public class SearchView extends ViewPart {
 	private TableViewer viewer;
 	private Action search;
 	private Action openPage;
 	Combo searchText;
-	public static final String CONFLUENCE_SEARCHVIEW_ID = "org.codehaus.timtam.views.SearchResultBrowser";
+	public static final String CONFLUENCE_SEARCHVIEW_ID = "org.codehaus.timtam.views.SearchView";
 	protected static final int NOT_FOUND = -1;
 	/*
 	 * The content provider class is responsible for providing objects to the
@@ -90,7 +88,7 @@ public class SearchView extends ViewPart {
 	 * or ignore it and always show the same content (like Task List, for
 	 * example).
 	 */
-	class ViewContentProvider implements IStructuredContentProvider {
+	static class ViewContentProvider implements IStructuredContentProvider {
 		private Collection searchResults;
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			if (newInput != null && newInput instanceof Collection) {
@@ -106,7 +104,7 @@ public class SearchView extends ViewPart {
 			return new Object[]{};
 		}
 	}
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+	static class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		private static final int TITLE = 0;
 		private static final int SERVER = 1;
 		private static final int EXCERPT = 2;
@@ -122,15 +120,22 @@ public class SearchView extends ViewPart {
 		}
 		public String getColumnText(Object obj, int index) {
 			SearchResult result = (SearchResult) obj;
+			String res = null;
 			switch (index) {
 				case TITLE :
-					return result.getTitle();
+					res = result.getTitle();
+					break;
 				case EXCERPT :
-					return result.getExcerpt();
+					res =  result.getExcerpt();
+					break;
 				case SERVER :
-					return result.getServer();
+					res = result.getServer();
+					break;
 			}
-			return "";
+			if(res == null){
+				res = "";
+			}
+			return res;
 		}
 		public Image getColumnImage(Object obj, int index) {
 			if (index != 0) {
@@ -140,7 +145,7 @@ public class SearchView extends ViewPart {
 			return TimTamPlugin.getInstance().loadImage((String) imageMap.get(result.getType()));
 		}
 	}
-	class NameSorter extends ViewerSorter {
+	static class NameSorter extends ViewerSorter {
 	}
 	/**
 	 * The constructor.
@@ -152,24 +157,28 @@ public class SearchView extends ViewPart {
 	 * it.
 	 */
 	public void createPartControl(Composite parent) {
+		
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new NameSorter());
 		viewer.setInput(getViewSite());
+		
 		TableColumn column = new TableColumn(viewer.getTable(), SWT.LEFT);
 		column.setText("Title");
-		column.setWidth(200);
-		column = new TableColumn(viewer.getTable(), SWT.LEFT);
-		column.setText("Server");
-		column.setWidth(200);
+		column.setWidth(150);
+
 		column = new TableColumn(viewer.getTable(), SWT.LEFT);
 		column.setText("Excerpt");
 		column.setWidth(300);
+		
+		column = new TableColumn(viewer.getTable(), SWT.LEFT);
+		column.setText("Server");
+		column.setWidth(150);
+		
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
 		makeActions();
-		contributeToActionBars();
 		hookContextMenu();
 		hookDoubleClickAction();
 	}
@@ -185,76 +194,64 @@ public class SearchView extends ViewPart {
 		viewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, viewer);
 	}
-	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
-		fillLocalToolBar(bars.getToolBarManager());
-		bars.getToolBarManager().add(new ControlContribution("Search") {
-			protected Control createControl(Composite parent) {
-				searchText = new Combo(parent, SWT.NULL);
-				searchText.setSize(200, searchText.getSize().y);
-				searchText.addListener(SWT.DefaultSelection, new Listener() {
-					public void handleEvent(Event event) {
-						search.run();
-					}
-				});
-				return searchText;
-			}
-		});
-	}
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(search);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(search);
-	}
-	private void makeActions() {
-		search = new Action() {
+	
+
+	public void search(final String query) {
+		Display.getCurrent().asyncExec(new Runnable(){
 			public void run() {
-				String query = searchText.getText();
-				Collection results = TimTamModel.getInstace().search(query);
-				viewer.setInput(results);
+				Collection results = null;
+                try {
+                    results = TimTamModel.getInstace().search(query);
+                } catch (RemoteException e) {
+                    TimTamPlugin plugin = TimTamPlugin.getInstance();
+                    plugin.logException("Search failed",e,true);
+                }
+                viewer.setInput(results);
 				TableColumn[] columns = viewer.getTable().getColumns();
 				for (int i = 0; i < columns.length; i++) {
 					TableColumn column = columns[i];
 					column.pack();
 				}
-				if (searchText.indexOf(query) == NOT_FOUND) {
-					searchText.add(query, 0);
-				}
+
 			}
-		};
-		search.setText("Search");
-		search.setToolTipText("Search for pages containg the given phrase");
-		search.setImageDescriptor(TimTamPlugin.getInstance().loadImageDescriptor(TimTamPlugin.IMG_SEARCH));
+		});
+		
+	}
+	
+	private void makeActions() {
 		openPage = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				Object obj = ((IStructuredSelection) selection).getFirstElement();
-				//TODO open a page in a page editor
 				SearchResult result = (SearchResult) obj;
-				SearchResultBrowser browser = getSearchBrowser();
-				browser.navigateTo(result.getUrl());
+				SearchResultBrowser browser = getSearchBrowser(result);
 			}
 		};
 	}
-	SearchResultBrowser getSearchBrowser() {
+	SearchResultBrowser getSearchBrowser(SearchResult result) {
 		IWorkbenchPage workbenchPage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		workbenchPage.setEditorAreaVisible(true);
 		IEditorReference[] editors = workbenchPage.getEditorReferences();
 		for (int i = 0; i < editors.length; i++) {
 			IEditorReference reference = editors[i];
 			if (reference.getId().equals(SearchResultBrowser.ID)) {
-				return (SearchResultBrowser) reference.getEditor(true);
+				IEditorPart editor = reference.getEditor(true);
+				workbenchPage.activate(editor);
+				((SearchResultBrowser)editor).navigateTo(result.getUrl());
+				return (SearchResultBrowser)editor; 
 			}
 		}
 		IEditorPart part = null;
 		try {
-			part = workbenchPage.openEditor(new SearchResultBrowserInput(), SearchResultBrowser.ID);
+			part = workbenchPage.openEditor(new SearchResultBrowserInput(result.getUrl()),
+											SearchResultBrowser.ID);
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			TimTamPlugin.getInstance().logException("failed to open a search browser",e, true);
 		}
 		return (SearchResultBrowser) part;
 	}
@@ -270,38 +267,5 @@ public class SearchView extends ViewPart {
 	 */
 	public void setFocus() {
 		viewer.getControl().setFocus();
-	}
-	
-	class SearchResultBrowserInput implements IEditorInput {
-		public boolean exists() {
-			return false;
-		}
-		public Object getAdapter(Class adapter) {
-			return null;
-		}
-		public ImageDescriptor getImageDescriptor() {
-			return null;
-		}
-		public String getName() {
-			return "Search Results Browser";
-		}
-		public IPersistableElement getPersistable() {
-			return new IPersistableElement() {
-				public String getFactoryId() {
-					return "";
-				}
-				public void saveState(IMemento memento) {
-				}
-			};
-		}
-		public boolean equals(Object o) {
-			if ((o != null) && (o instanceof SearchResultBrowserInput)) {
-				return true;
-			}
-			return false;
-		}
-		public String getToolTipText() {
-			return null; //$NON-NLS-1$	
-		}
 	}
 }

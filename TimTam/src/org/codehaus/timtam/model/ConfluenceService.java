@@ -1,25 +1,24 @@
-
 /*
-*
-* Copyright 2003(c)  Zohar Melamed
-* All rights reserved.
-*
+ *
+ * Copyright 2003(c)  Zohar Melamed
+ * All rights reserved.
+ *
 
  Redistribution and use of this software and associated documentation
  ("Software"), with or without modification, are permitted provided
  that the following conditions are met:
 
  1. Redistributions of source code must retain copyright
-    statements and notices.  Redistributions must also contain a
-    copy of this document.
+ statements and notices.  Redistributions must also contain a
+ copy of this document.
 
  2. Redistributions in binary form must reproduce the
-    above copyright notice, this list of conditions and the
-    following disclaimer in the documentation and/or other
-    materials provided with the distribution.
+ above copyright notice, this list of conditions and the
+ following disclaimer in the documentation and/or other
+ materials provided with the distribution.
 
  3. Due credit should be given to The Codehaus and Contributors
-    http://timtam.codehaus.org/
+ http://timtam.codehaus.org/
 
  THIS SOFTWARE IS PROVIDED BY THE CODEHAUS AND CONTRIBUTORS
  ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT
@@ -34,16 +33,18 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*
-*
-*/
+ *
+ *
+ */
 package org.codehaus.timtam.model;
 
 import org.codehaus.timtam.TimTamPlugin;
 
 import com.atlassian.confluence.remote.ConfluenceSoapHelper;
 import com.atlassian.confluence.remote.IConfluenceSoapService;
+import com.atlassian.confluence.remote.NotPermittedException;
 import com.atlassian.confluence.remote.RemoteAttachment;
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePage;
 import com.atlassian.confluence.remote.RemotePageHistory;
 import com.atlassian.confluence.remote.RemotePageSummary;
@@ -59,106 +60,148 @@ import electric.xml.io.Mappings;
  * @author zohar melamed
  *  
  */
-public abstract class ConfluenceService {
-	private String token;
-	private IConfluenceSoapService service;
-	private static final String CONFLUENCE_SOAP_EP = "/rpc/soap/confluenceservice-v1.wsdl";
-	String server;
-	String user;
-	String password;
+public class ConfluenceService {
+    private String token;
+    private IConfluenceSoapService service;
+    private static final String CONFLUENCE_SOAP_EP = "/rpc/soap/confluenceservice-v1.wsdl";
+    protected String server;
+    protected String user;
+    protected String password;
+    private long lastLogin;
+    private static final long SEESION_EXPIRY = 3 * 60000;
 
-	static class ConcreteService extends ConfluenceService {
-	}
+    static class ConcreteService extends ConfluenceService {
+    }
 
-	/**
-	 * @return Returns the user.
-	 */
-	public String getUser() {
-		return user;
-	}
+    /**
+     * renew our session token every SEESION_EXPIRY msc
+     */
+    private String getToken() {
+        long currTime = System.currentTimeMillis();
+        if (currTime - lastLogin > SEESION_EXPIRY) {
+            try {
+                token = service.login(user, password);
+                lastLogin = currTime;
+            } catch (Exception e) {
+                TimTamPlugin.getInstance()
+                        .logException("failed to re-login", e, true);
+            }
+        }
+        return token;
+    }
 
-	public static ConfluenceService getService(String server, String user, String password) throws LoginFailureException {
+    /**
+     * @return Returns the user.
+     */
+    public String getUser() {
+        return user;
+    }
 
-		ConcreteService instance = new ConcreteService();
-		instance.password = password;
-		instance.user = user;
-		instance.server = server.endsWith(".wsdl")?server:server+CONFLUENCE_SOAP_EP;
-		instance.connectAndLogin();
-		return instance;
-	}
+    public static ConfluenceService getService(String server, String user,
+            String password) throws LoginFailureException {
 
-	protected void connectAndLogin() throws LoginFailureException {
-		if (service == null) {
-			TimTamPlugin plugin = TimTamPlugin.getInstance();
-			ProxyContext context = new ProxyContext();
-			if(plugin.shouldUseProxy()){
-				context.setProxyHost(plugin.getProxyHost());
-				context.setProxyPort(plugin.getProxyPort());
-				context.setProxyUser(plugin.getProxyUser());
-				context.setProxyPassword(plugin.getProxyPassword());
-			}
-			
-			try {
-				//TODO loos the below hack by getting atlassian to sort it out
-				Mappings.readMappings("ConfluenceSoap.map");
-				service = (IConfluenceSoapService) Registry.bind(server, IConfluenceSoapService.class, context);
-				ConfluenceSoapHelper.bind(server);
-			} catch (Exception e) {
-				String message = "failed to bind to : " + server;
-				plugin.logException(message, e);
-				throw new LoginFailureException(message, e);
-			}
+        ConcreteService instance = new ConcreteService();
+        instance.password = password;
+        instance.user = user;
+        instance.server = server.endsWith(".wsdl") ? server : server
+                + CONFLUENCE_SOAP_EP;
+        instance.connectAndLogin();
+        return instance;
+    }
 
-			try {
-				token =  service.login(user,password);
-			} catch (Exception e) {
-				StringBuffer buffer = new StringBuffer("failed to login to : ");
-				buffer.append(server).append(" as:  ").append(user);
-				buffer.append(" with password : ").append(password);
-				buffer.append(" error : "+e.getMessage());
-				plugin.logException(buffer.toString(), e);
-				throw new LoginFailureException(buffer.toString(), e);
-			}
-		}
-	}
+    protected void connectAndLogin() throws LoginFailureException {
+        if (service == null) {
+            TimTamPlugin plugin = TimTamPlugin.getInstance();
+            ProxyContext context = new ProxyContext();
+            if (plugin.shouldUseProxy()) {
+                context.setProxyHost(plugin.getProxyHost());
+                context.setProxyPort(plugin.getProxyPort());
+                context.setProxyUser(plugin.getProxyUser());
+                context.setProxyPassword(plugin.getProxyPassword());
+            }
+            if (plugin.shouldUseHTTPAuthentication()) {
+                context.setAuthPassword(plugin.getHTTPPassword());
+                context.setAuthUser(plugin.getHTTPUser());
+            }
 
-	public RemoteSearchResult[] search(String query, int maxResults) {
-		return service.search(token, query, maxResults);
-	}
+            try {
+                //TODO loos the below hack by getting atlassian to sort it out
+                Mappings.readMappings("ConfluenceSoap.map");
+                service = (IConfluenceSoapService) Registry.bind(server,
+                        IConfluenceSoapService.class, context);
+                ConfluenceSoapHelper.bind(server);
+            } catch (Exception e) {
+                String message = "failed to bind to : " + server;
+                plugin.logException(message, e, true);
+                throw new LoginFailureException(message, e);
+            }
 
-	public boolean logout() {
-		return service.logout(token);
-	}
-	public RemotePage getPage(long pageId) {
-		return service.getPage(token, pageId);
-	}
-	public RemoteSpace getSpace(String spaceId) {
-		return service.getSpace(token, spaceId);
-	}
-	public RemoteSpaceSummary[] getSpaces() {
-		return service.getSpaces(token);
-	}
-	public RemotePageSummary[] getPages(String spaceId) {
-		return service.getPages(token, spaceId);
-	}
-	public RemotePageHistory[] getPageHistory(long pageId) {
-		return service.getPageHistory(token, pageId);
-	}
-	public RemotePage storePage(RemotePage page) {
-		return service.storePage(token, page);
-	}
-	public String renderContent(String spaceId, long pageId, String content) {
-		return service.renderContent(token, spaceId, pageId, content);
-	}
-	public Boolean deletePage(long pageId) {
-		return service.deletePage(token, pageId);
-	}
+            try {
+                token = service.login(user, password);
+                lastLogin = System.currentTimeMillis();
+            } catch (Exception e) {
+                StringBuffer buffer = new StringBuffer("failed to login to : ");
+                buffer.append(server).append(" as:  ").append(user);
+                buffer.append(" with password : ").append(password);
+                buffer.append(" error : " + e.getMessage());
+                TimTamPlugin.getInstance().logException(buffer.toString(), e, true);
+                throw new LoginFailureException(buffer.toString(), e);
+            }
+        }
+    }
 
-	public String[] getPermissions(String spaceId) {
-		return service.getPermissions(token, spaceId);
-	}
+    public RemoteSearchResult[] search(String query, int maxResults)throws RemoteException {
+        return service.search(getToken(), query, maxResults);
+    }
 
-	public RemoteAttachment[] getAttachments(long pageId) {
-		return service.getAttachments(token, pageId);
-	}
+    public boolean logout() {
+        try {
+            return service.logout(getToken());
+        } catch (RemoteException e) {
+            // yes we have no bannans today
+        }
+        return false;
+    }
+
+    public RemotePage getPage(long pageId) throws RemoteException {
+        return service.getPage(getToken(), pageId);
+    }
+
+    public RemoteSpace getSpace(String spaceId) throws RemoteException {
+        return service.getSpace(getToken(), spaceId);
+    }
+
+    public RemoteSpaceSummary[] getSpaces() throws RemoteException {
+        return service.getSpaces(getToken());
+    }
+
+    public RemotePageSummary[] getPages(String spaceId) throws RemoteException {
+        return service.getPages(getToken(), spaceId);
+    }
+
+    public RemotePageHistory[] getPageHistory(long pageId)throws RemoteException {
+        return service.getPageHistory(getToken(), pageId);
+    }
+
+    public RemotePage storePage(RemotePage page) throws NotPermittedException,RemoteException {
+        return service.storePage(getToken(), page);
+    }
+
+    public String renderContent(String spaceId, long pageId, String content)throws RemoteException {
+        return service.renderContent(getToken(), spaceId, pageId, content);
+    }
+
+    public Boolean deletePage(long pageId) throws NotPermittedException,RemoteException {
+        return service.deletePage(getToken(), pageId);
+    }
+
+    public String[] getPermissions(String spaceId) throws RemoteException {
+        return service.getPermissions(getToken(), spaceId);
+    }
+
+    public RemoteAttachment[] getAttachments(long pageId)
+            throws RemoteException {
+        return service.getAttachments(getToken(), pageId);
+    }
+
 }

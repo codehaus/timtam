@@ -39,7 +39,12 @@
 package org.codehaus.timtam.views;
 
 
+import java.text.DateFormat;
+
+import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluencePage;
+import org.codehaus.timtam.model.TimTamHistoryItem;
+import org.eclipse.compare.EditionSelectionDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -55,11 +60,13 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePageHistory;
 
 
@@ -70,6 +77,8 @@ public class VersionsView extends ViewPart implements IPartListener {
 	private static RemotePageHistory[] EMPTY= new RemotePageHistory[0];  
 	public static final String CONFLUENCE_VERSIONSVIEW_ID = "org.codehaus.timtam.views.VersionsView";
 	private IWorkbenchPart currPart;
+	private ConfluencePage confPage;
+	private RemotePageHistory[] histories;
 
 	 
 	class VersionsContentProvider implements IStructuredContentProvider {
@@ -95,7 +104,7 @@ public class VersionsView extends ViewPart implements IPartListener {
 				case MODIFIER:
 					return history.modifier;
 					case DATE:
-						return history.modified.toLocaleString();
+						return DateFormat.getDateTimeInstance().format(history.modified);
 						
 			}
 			return getText(obj);
@@ -134,6 +143,29 @@ public class VersionsView extends ViewPart implements IPartListener {
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
 		
+
+	
+		Action compare = new Action() {
+				public void run() {
+					if(histories == null){
+						return;
+					}
+					
+					EditionSelectionDialog dialog = new EditionSelectionDialog(getSite().getShell(),
+																			   TimTamPlugin.getInstance().getResourceBundle());
+					
+					dialog.setEditionTitleArgument(confPage.getTitle());
+					dialog.setEditionTitleImage(TimTamPlugin.getInstance().getPageIcon(confPage));
+					dialog.setBlockOnOpen(true);
+					TimTamHistoryItem items[] = new TimTamHistoryItem [histories.length];
+				}
+		};
+		
+		compare.setText("View Diff");
+		compare.setToolTipText("View Differences between versions");
+		compare.setImageDescriptor(TimTamPlugin.getInstance().loadImageDescriptor(TimTamPlugin.IMG_PAGE));
+
+		getViewSite().getActionBars().getToolBarManager().add(compare);
 		hookDoubleClickAction();
 	}
 
@@ -167,7 +199,10 @@ public class VersionsView extends ViewPart implements IPartListener {
 	 */
 	public void dispose() {
 		super.dispose();
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().removePartListener(this);
+		IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		if(activePage!= null){
+			activePage.removePartListener(this);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -177,10 +212,15 @@ public class VersionsView extends ViewPart implements IPartListener {
 		currPart = part;
 		IEditorInput input = (IEditorInput) part.getAdapter(IEditorInput.class);
 		if(input != null){
-			ConfluencePage confPage = (ConfluencePage) input.getAdapter(ConfluencePage.class);
+			confPage = (ConfluencePage) input.getAdapter(ConfluencePage.class);
 			if(confPage!=null){
-				RemotePageHistory[] history = confPage.getPageHistory();
-				viewer.setInput(history);
+				try {
+                    histories = confPage.getPageHistory();
+                } catch (RemoteException e) {
+                    TimTamPlugin.getInstance().logException("failed to get versions for page "+confPage.getTitle(),
+                            e,true);
+                }
+				viewer.setInput(histories);
 				TableColumn[] columns = viewer.getTable().getColumns();
 				for (int i = 0; i < columns.length; i++) {
 					TableColumn column = columns[i];

@@ -32,6 +32,7 @@
  *  
  */
 package org.codehaus.timtam.model.adapters;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,245 +57,299 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
+import com.atlassian.confluence.remote.NotPermittedException;
+import com.atlassian.confluence.remote.RemoteException;
 import com.atlassian.confluence.remote.RemotePageSummary;
 import com.atlassian.confluence.remote.RemoteSpace;
 import com.atlassian.confluence.remote.RemoteSpaceSummary;
+
 /**
  * @author zohar melamed
  *  
  */
-public class SpaceAdapter implements ConfluenceSpace, IEditorInput, TreeAdapter , PageContainer{
-	private RemoteSpaceSummary spaceSummary;
-	private RemoteSpace space;
-	private ServerAdapter parent;
-	private PageContainerImpl childPages;
-	private Map parentToChildPageMap = new HashMap();
-	private ConfluenceService service;
-	private boolean spaceOk = true;
-	private boolean pagesLoaded;
-	private boolean readOnly;
-	/**
-	 * @param spaceSummary
-	 */
-	public SpaceAdapter(RemoteSpaceSummary spaceSummary, ServerAdapter parent,
-			ConfluenceService service) {
-		this.service = service;
-		this.parent = parent;
-		this.spaceSummary = spaceSummary;
-		childPages = new PageContainerImpl(service, this, null);
-	}
-	
-	public void refresh(IProgressMonitor monitor) {
-		parentToChildPageMap.clear();
-		childPages.clear();
-		spaceOk = false;
-		readOnly = true;
-		space = service.getSpace(spaceSummary.key);
-		monitor.setTaskName("Loading Space " + spaceSummary.name);
-		String[] permissions = service.getPermissions(spaceSummary.key);
-		for (int i = 0; i < permissions.length; i++) {
-			String permission = permissions[i];
-			if (permission.equals("modify")) {
-				readOnly = false;
-			}
-		}
-		
-		space = service.getSpace(spaceSummary.key);
-		monitor.subTask("Getting Pages ...");
-		try {
-			buildPageMap(service.getPages(spaceSummary.key), monitor);
-			List rootPages = (List) parentToChildPageMap.get(new Long(0));
-			for (Iterator iter = rootPages.iterator(); iter.hasNext();) {
-				childPages.addPage((RemotePageSummary) iter.next());
-			}
-			spaceOk = pagesLoaded = true;
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				public  void run(){
-					ErrorDialog.openError(null, "Error Loading Space : "
-							+ spaceSummary.name, e.getMessage(), new Status(
-							IStatus.WARNING, "TimTam", IStatus.OK,
-							"Error getting pages", e));
-				
-				}
-			});
-		}
-	}
-	/**
-	 * @param summaries
-	 */
-	private void buildPageMap(RemotePageSummary[] summaries,
-			IProgressMonitor monitor) {
-		monitor.subTask("Loaded " + summaries.length + " Page Summaries");
-		for (int i = 0; i < summaries.length; i++) {
-			RemotePageSummary summary = summaries[i];
-			Long key = new Long(summary.parentId);
-			List pageList = (List) parentToChildPageMap.get(key);
-			if (pageList == null) {
-				pageList = new ArrayList();
-				parentToChildPageMap.put(key, pageList);
-			}
-			pageList.add(summary);
-		}
-	}
-	List getChildren(long parentId) {
-		List childrenList = (List) parentToChildPageMap.get(new Long(parentId));
-		return childrenList == null ? Collections.EMPTY_LIST : childrenList;
-	}
-	public Image getImage() {
-		return TimTamPlugin.getInstance().getSpaceIcon(this);
-	}
-	public Object getParent() {
-		return parent;
-	}
-	public String getText() {
-		return spaceSummary.name;
-	}
-	public long getHomepageId() {
-		return space.homePage;
-	}
-	public String getSpaceKey() {
-		return space.key;
-	}
-	public Integer getType() {
-		return SPACE;
-	}
-	public Object createPage(String name) {
-		return childPages.createPage(name);
-	}
-	public void removePage(PageAdapter adapter) {
-		childPages.removePage(adapter);
-	}
-	public boolean isReadOnly() {
-		return readOnly;
-	}
-	public boolean isHealty() {
-		return spaceOk;
-	}
-	public Object[] getPages() {
-		if (!pagesLoaded) {
-			IRunnableWithProgress op = new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) {
-					refresh(monitor);
-				}
-			};
-			GUIUtil.runOperationWithProgress(op, null);
-		}
-		return childPages.getPages();
-	}
-	public boolean hasPages() {
-		if(!pagesLoaded && spaceOk){
-			return true;
-		}
-		
-		return childPages.hasPages();
-	}
-	
-	public Object[] getChildren() {
-		return getPages();
-	}
-	public boolean hasChildren() {
-		return hasPages();
-	}
-	
-	/**
-	 * @param pagesToCopy
-	 * @return
-	 */
-	public boolean copy(Object[] pagesToCopy, IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object arg0) {
-		if(arg0 instanceof SpaceAdapter){
-			if(space == null){
-				return super.equals(arg0);
-			}
-			SpaceAdapter otherSpace = (SpaceAdapter) arg0;
-			if(otherSpace == null || otherSpace.space == null){
-				return false;
-			}
-			return space.url.equals(otherSpace.space.url);
-		}
-		return false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[], boolean, org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
-		childPages.transferPages(pagesToCopy, move, monitor);
-	}
-	
-	
-	///////// EditorInput 
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IEditorInput#exists()
-	 */
-	public boolean exists() {
-		return false;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IEditorInput#getImageDescriptor()
-	 */
-	public ImageDescriptor getImageDescriptor() {
-		final Image image = TimTamPlugin.getInstance().getSpaceIcon(this);
-		return new ImageDescriptor(){
-			public ImageData getImageData() {
-				return image.getImageData();
-			}
-		};
-	}	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IEditorInput#getName()
-	 */
-	public String getName() {
-		return getText();
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IEditorInput#getPersistable()
-	 */
-	public IPersistableElement getPersistable() {
-		return null;
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IEditorInput#getToolTipText()
-	 */
-	public String getToolTipText() {
-		return getName();
-	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	public Object getAdapter(Class adapter) {
-		if (adapter == ConfluenceSpace.class)
-			return this;
-		
-		return null;
-	}
+public class SpaceAdapter implements ConfluenceSpace, IEditorInput,
+        TreeAdapter, PageContainer {
+    private RemoteSpaceSummary spaceSummary;
+    private RemoteSpace space;
+    private ServerAdapter parent;
+    private PageContainerImpl childPages;
+    private Map parentToChildPageMap = new HashMap();
+    private ConfluenceService service;
+    private boolean spaceOk = true;
+    private boolean pagesLoaded;
+    private boolean readOnly;
 
-	/* (non-Javadoc)
-	 * @see org.codehaus.timtam.model.ConfluenceSpace#getDescription()
-	 */
-	public String getDescription() {
-		return space.description;
-	}
+    /**
+     * @param spaceSummary
+     */
+    public SpaceAdapter(RemoteSpaceSummary spaceSummary, ServerAdapter parent,
+            ConfluenceService service) {
+        this.service = service;
+        this.parent = parent;
+        this.spaceSummary = spaceSummary;
+        childPages = new PageContainerImpl(service, this, null);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.codehaus.timtam.model.ConfluenceSpace#getUrl()
-	 */
-	public String getUrl() {
-		return space.url;
-	}
+    public void refresh(IProgressMonitor monitor) throws RemoteException {
+        parentToChildPageMap.clear();
+        childPages.clear();
+        spaceOk = false;
+        readOnly = true;
+        space = service.getSpace(spaceSummary.key);
+        monitor.setTaskName("Loading Space " + spaceSummary.name);
+        String[] permissions = service.getPermissions(spaceSummary.key);
+        for (int i = 0; i < permissions.length; i++) {
+            String permission = permissions[i];
+            if (permission.equals("modify")) {
+                readOnly = false;
+            }
+        }
 
-	/* (non-Javadoc)
-	 * @see org.codehaus.timtam.model.ConfluenceSpace#getKey()
-	 */
-	public String getKey() {
-		return space.key;
-	}
+        space = service.getSpace(spaceSummary.key);
+        monitor.subTask("Getting Pages ...");
+        try {
+            buildPageMap(service.getPages(spaceSummary.key), monitor);
+            List rootPages = (List) parentToChildPageMap.get(new Long(0));
+            for (Iterator iter = rootPages.iterator(); iter.hasNext();) {
+                childPages.addPage((RemotePageSummary) iter.next());
+            }
+            spaceOk = pagesLoaded = true;
+        } catch (final Exception e) {
+            Display.getDefault().syncExec(new Runnable() {
+                public void run() {
+                    ErrorDialog.openError(null, "Error Loading Space : "
+                            + spaceSummary.name, e.getMessage(), new Status(
+                            IStatus.WARNING, "TimTam", IStatus.OK,
+                            "Error getting pages", e));
+
+                }
+            });
+        }
+    }
+
+    /**
+     * @param summaries
+     */
+    private void buildPageMap(RemotePageSummary[] summaries,
+            IProgressMonitor monitor) {
+        monitor.subTask("Loaded " + summaries.length + " Page Summaries");
+        for (int i = 0; i < summaries.length; i++) {
+            RemotePageSummary summary = summaries[i];
+            Long key = new Long(summary.parentId);
+            List pageList = (List) parentToChildPageMap.get(key);
+            if (pageList == null) {
+                pageList = new ArrayList();
+                parentToChildPageMap.put(key, pageList);
+            }
+            pageList.add(summary);
+        }
+    }
+
+    List getChildren(long parentId) {
+        List childrenList = (List) parentToChildPageMap.get(new Long(parentId));
+        return childrenList == null ? Collections.EMPTY_LIST : childrenList;
+    }
+
+    public Image getImage() {
+        return TimTamPlugin.getInstance().getSpaceIcon(this);
+    }
+
+    public Object getParent() {
+        return parent;
+    }
+
+    public String getText() {
+        return spaceSummary.name;
+    }
+
+    public long getHomepageId() {
+        return space.homePage;
+    }
+
+    public String getSpaceKey() {
+        return space.key;
+    }
+
+    public Integer getType() {
+        return SPACE;
+    }
+
+    public Object createPage(String name) throws NotPermittedException, RemoteException {
+        return childPages.createPage(name);
+    }
+
+    public void removePage(PageAdapter adapter) {
+        childPages.removePage(adapter);
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public boolean isHealty() {
+        return spaceOk;
+    }
+
+    public Object[] getPages() {
+        if (!pagesLoaded) {
+            IRunnableWithProgress op = new IRunnableWithProgress() {
+                public void run(IProgressMonitor monitor) {
+                    try {
+                        refresh(monitor);
+                    } catch (RemoteException e) {
+                        TimTamPlugin plugin = TimTamPlugin.getInstance();
+                        plugin.logException("refresh failed",e,true);
+                    }
+                }
+            };
+            GUIUtil.runOperationWithProgress(op, null);
+        }
+        return childPages.getPages();
+    }
+
+    public boolean hasPages() {
+        if (!pagesLoaded && spaceOk) {
+            return true;
+        }
+
+        return childPages.hasPages();
+    }
+
+    public Object[] getChildren() {
+        return getPages();
+    }
+
+    public boolean hasChildren() {
+        return hasPages();
+    }
+
+    /**
+     * @param pagesToCopy
+     * @return
+     */
+    public boolean copy(Object[] pagesToCopy, IProgressMonitor monitor) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object arg0) {
+        if (arg0 instanceof SpaceAdapter) {
+            if (space == null) {
+                return super.equals(arg0);
+            }
+            SpaceAdapter otherSpace = (SpaceAdapter) arg0;
+            if (otherSpace == null || otherSpace.space == null) {
+                return false;
+            }
+            return space.url.equals(otherSpace.space.url);
+        }
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[],
+     *      boolean, org.eclipse.core.runtime.IProgressMonitor)
+     */
+    public void transferPages(Object[] pagesToCopy, boolean move,
+            IProgressMonitor monitor) throws RemoteException {
+        childPages.transferPages(pagesToCopy, move, monitor);
+    }
+
+    ///////// EditorInput
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IEditorInput#exists()
+     */
+    public boolean exists() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IEditorInput#getImageDescriptor()
+     */
+    public ImageDescriptor getImageDescriptor() {
+        final Image image = TimTamPlugin.getInstance().getSpaceIcon(this);
+        return new ImageDescriptor() {
+            public ImageData getImageData() {
+                return image.getImageData();
+            }
+        };
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IEditorInput#getName()
+     */
+    public String getName() {
+        return getText();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IEditorInput#getPersistable()
+     */
+    public IPersistableElement getPersistable() {
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IEditorInput#getToolTipText()
+     */
+    public String getToolTipText() {
+        return getName();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+     */
+    public Object getAdapter(Class adapter) {
+        if (adapter == ConfluenceSpace.class)
+            return this;
+
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.codehaus.timtam.model.ConfluenceSpace#getDescription()
+     */
+    public String getDescription() {
+        return space.description;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.codehaus.timtam.model.ConfluenceSpace#getUrl()
+     */
+    public String getUrl() {
+        return space.url;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.codehaus.timtam.model.ConfluenceSpace#getKey()
+     */
+    public String getKey() {
+        return space.key;
+    }
 }

@@ -63,6 +63,7 @@ public class TimTamPerspectiveFactory implements IPerspectiveFactory {
 	public void createInitialLayout(IPageLayout layout)  {
 		layout.addShowViewShortcut(ConfluenceView.CONFLUENCE_TREEVIEW_ID);
 		layout.addShowViewShortcut(SearchView.CONFLUENCE_SEARCHVIEW_ID);
+		layout.addShowViewShortcut(VersionsView.CONFLUENCE_VERSIONSVIEW_ID);
 		
 		// Editors are placed for free.
 		String editorArea = layout.getEditorArea();

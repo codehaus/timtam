@@ -41,9 +41,9 @@ package org.codehaus.timtam.template;
 import org.codehaus.timtam.TimTamPlugin;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateCompletionProcessor;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -52,7 +52,7 @@ import org.eclipse.swt.graphics.Image;
  */
 public class ConfluenceCompletionProcessor extends TemplateCompletionProcessor{
 
-	private char[] completionChars = new char[]{'{'};
+	//private char[] completionChars = new char[]{'{','['};
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getTemplates(java.lang.String)
 	 */
@@ -60,14 +60,6 @@ public class ConfluenceCompletionProcessor extends TemplateCompletionProcessor{
 		return TimTamPlugin.getInstance().getTemplateStore().getTemplates();
 	}
 	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getContextType(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-	 */
-	protected ContextType getContextType(ITextViewer viewer, IRegion region) {
-		return TimTamPlugin.getInstance().getContextTypeRegistry().getContextType(ConfluenceContextType.CONTEXT_TYPE);	
-	}
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getImage(org.eclipse.jface.text.templates.Template)
 	 */
@@ -75,10 +67,12 @@ public class ConfluenceCompletionProcessor extends TemplateCompletionProcessor{
 		return TimTamPlugin.getInstance().getCompletionProcessorImage();
 	}
 	
+
+
 	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
+	 * @see org.eclipse.jface.text.templates.TemplateCompletionProcessor#getContextType(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return completionChars;
+	protected TemplateContextType getContextType(ITextViewer viewer, IRegion region) {
+		return TimTamPlugin.getInstance().getContextTypeRegistry().getContextType(ConfluenceContextType.CONTEXT_TYPE);	
 	}
 }
