@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codehaus.timtam.TimTamPlugin;
+import org.codehaus.timtam.model.*;
 import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.ConfluenceSpace;
 import org.codehaus.timtam.util.GUIUtil;
@@ -58,12 +59,12 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  * @author zohar melamed
  *  
  */
-public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
+public class SpaceAdapter implements ConfluenceSpace, TreeAdapter , PageContainer{
 	private RemoteSpaceSummary spaceSummary;
 	private RemoteSpace space;
 	private ServerAdapter parent;
-	private PageContainer container;
-	private Map pages = new HashMap();
+	private PageContainerImpl childPages;
+	private Map parentToChildPageMap = new HashMap();
 	private ConfluenceService service;
 	private boolean spaceOk = true;
 	private boolean pagesLoaded;
@@ -76,7 +77,7 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 		this.service = service;
 		this.parent = parent;
 		this.spaceSummary = spaceSummary;
-		container = new PageContainer(service, this, null);
+		childPages = new PageContainerImpl(service, this, null);
 		String[] permissions = service.getPermissions(spaceSummary.key);
 		for (int i = 0; i < permissions.length; i++) {
 			String permission = permissions[i];
@@ -86,17 +87,17 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 		}
 	}
 	public void refresh(IProgressMonitor monitor) {
-		pages.clear();
-		container.clear();
+		parentToChildPageMap.clear();
+		childPages.clear();
 		spaceOk = false;
 		monitor.setTaskName("Loading Space " + spaceSummary.name);
 		space = service.getSpace(spaceSummary.key);
 		monitor.subTask("Getting Pages ...");
 		try {
 			buildPageMap(service.getPages(spaceSummary.key), monitor);
-			List rootPages = (List) pages.get(new Long(0));
+			List rootPages = (List) parentToChildPageMap.get(new Long(0));
 			for (Iterator iter = rootPages.iterator(); iter.hasNext();) {
-				container.addPage((RemotePageSummary) iter.next());
+				childPages.addPage((RemotePageSummary) iter.next());
 			}
 			spaceOk = pagesLoaded = true;
 		} catch (final Exception e) {
@@ -120,16 +121,16 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 		for (int i = 0; i < summaries.length; i++) {
 			RemotePageSummary summary = summaries[i];
 			Long key = new Long(summary.parentId);
-			List pageList = (List) pages.get(key);
+			List pageList = (List) parentToChildPageMap.get(key);
 			if (pageList == null) {
 				pageList = new ArrayList();
-				pages.put(key, pageList);
+				parentToChildPageMap.put(key, pageList);
 			}
 			pageList.add(summary);
 		}
 	}
 	List getChildren(long parentId) {
-		List childrenList = (List) pages.get(new Long(parentId));
+		List childrenList = (List) parentToChildPageMap.get(new Long(parentId));
 		return childrenList == null ? Collections.EMPTY_LIST : childrenList;
 	}
 	public Image getImage() {
@@ -151,10 +152,10 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 		return SPACE;
 	}
 	public Object createPage(String name) {
-		return container.createPage(name);
+		return childPages.createPage(name);
 	}
 	public void removePage(PageAdapter adapter) {
-		container.removePage(adapter);
+		childPages.removePage(adapter);
 	}
 	public boolean isReadOnly() {
 		return readOnly;
@@ -162,7 +163,7 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 	public boolean isHealty() {
 		return spaceOk;
 	}
-	public Object[] getChildren() {
+	public Object[] getPages() {
 		if (!pagesLoaded) {
 			IRunnableWithProgress op = new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) {
@@ -171,13 +172,51 @@ public class SpaceAdapter implements ConfluenceSpace, TreeAdapter {
 			};
 			GUIUtil.runOperationWithProgress(op, null);
 		}
-		return container.getChildren();
+		return childPages.getPages();
 	}
-	public boolean hasChildren() {
+	public boolean hasPages() {
 		if(!pagesLoaded && spaceOk){
 			return true;
 		}
 		
-		return container.hasChildren();
+		return childPages.hasPages();
+	}
+	
+	public Object[] getChildren() {
+		return getPages();
+	}
+	public boolean hasChildren() {
+		return hasPages();
+	}
+	
+	/**
+	 * @param pagesToCopy
+	 * @return
+	 */
+	public boolean copy(Object[] pagesToCopy, IProgressMonitor monitor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object arg0) {
+		if(arg0 instanceof SpaceAdapter){
+			if(space == null){
+				return super.equals(arg0);
+			}
+			SpaceAdapter otherSpace = (SpaceAdapter) arg0;
+			if(otherSpace == null || otherSpace.space == null){
+				return false;
+			}
+			return space.url.equals(otherSpace.space.url);
+		}
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see org.codehaus.timtam.model.PageContainer#transferPages(java.lang.Object[], boolean, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public void transferPages(Object[] pagesToCopy, boolean move, IProgressMonitor monitor) {
+		childPages.transferPages(pagesToCopy, move, monitor);
 	}
 }

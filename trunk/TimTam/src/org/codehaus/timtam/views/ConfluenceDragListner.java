@@ -32,7 +32,6 @@
  *  
  */
 package org.codehaus.timtam.views;
-import org.codehaus.timtam.model.adapters.PageAdapter;
 import org.codehaus.timtam.model.adapters.TreeAdapter;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
@@ -41,6 +40,7 @@ import org.eclipse.swt.dnd.TextTransfer;
  * @author Zohar
  */
 public class ConfluenceDragListner implements DragSourceListener {
+	public static final String TIMTAMD_DND = "TimTamD&D";
 	private ConfluenceView view;
 	/**
 	 * @param view
@@ -69,15 +69,8 @@ public class ConfluenceDragListner implements DragSourceListener {
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData(org.eclipse.swt.dnd.DragSourceEvent)
 	 */
 	public void dragSetData(DragSourceEvent event) {
-		if (TextTransfer.getInstance().isSupportedType(event.dataType)) {
-			TreeAdapter[] adapters = view.getSelectedNodes();
-			StringBuffer transferText = new StringBuffer();
-			for (int i = 0; i < adapters.length; i++) {
-				PageAdapter page = (PageAdapter) adapters[i];
-				transferText.append('{').append(page.getId()).append(',').append(page.getSpace()).append('}');
-			}
-			
-			event.data = transferText.toString();
+	if (TextTransfer.getInstance().isSupportedType(event.dataType)) {
+			event.data = TIMTAMD_DND;
 		}
 	}
 	/*
@@ -86,6 +79,6 @@ public class ConfluenceDragListner implements DragSourceListener {
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished(org.eclipse.swt.dnd.DragSourceEvent)
 	 */
 	public void dragFinished(DragSourceEvent event) {
-		System.out.println("need to do the cut part");
+	//	System.out.println("need to do the cut part");
 	}
 }
