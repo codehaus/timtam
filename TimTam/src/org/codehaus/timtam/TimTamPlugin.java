@@ -41,12 +41,17 @@
 
 package org.codehaus.timtam;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.codehaus.timtam.model.ConfluencePage;
+import org.codehaus.timtam.model.ConfluenceSpace;
 import org.codehaus.timtam.model.TimTamModel;
+import org.codehaus.timtam.template.ConfluenceContextType;
+import org.codehaus.timtam.util.DecoratorOverlayIcon;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -56,7 +61,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import electric.util.classloader.ClassLoaders;
@@ -67,6 +75,9 @@ import electric.util.classloader.ClassLoaders;
 public class TimTamPlugin extends AbstractUIPlugin {
 	//The shared instance.
 	private static TimTamPlugin plugin;
+	private TemplateStore templateStore;
+	//The context type registry. 
+	private ContextTypeRegistry ctxTypeRegistry;	
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
 	private static boolean trace;
@@ -84,6 +95,12 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	public static final String IMG_SERVER = "icons/server.gif";
 	public static final String IMG_ADDSERVER= "icons/addServer.gif";
 	public static final String IMG_REFRESH_NODE = "icons/refreshServer.gif";
+	// browser
+	public static final String IMG_BROWSER_FORWARD = "icons/forward.gif";
+	public static final String IMG_BROWSER_BACK= "icons/back.gif";
+	public static final String IMG_BROWSER_STOP= "icons/stop.gif";
+	public static final String IMG_BROWSER_REFRESH= "icons/browser-refresh.gif";
+
 	
 	public static final String P_USE_PROXY = "use_proxy";
 	public static final String P_PROXY_HOST = "proxy_host";
@@ -91,9 +108,12 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	public static final String P_PROXY_USER = "proxy_user";
 	public static final String P_PROXY_PASSWORD = "proxy_password";
 
+	private static final String IMG_READONLY_DECORATOR = "icons/readonly-decorator.gif";
+	private static final String IMG_READONLY_PAGE = "readonlypage"; 
+	private static final String IMG_READONLY_HOMEPAGE = "readonlyhomepage"; 
+	private static final String IMG_READONLY_SPACE = "readonlyspace"; 
 
-
-
+	private static final String CUSTOM_TEMPLATES_KEY= "org.codehaus.timtam.customtemplates"; //$NON-NLS-1$
 
 
 	static {
@@ -148,13 +168,45 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
-
+	
+	/**
+	 * Returns this plug-in's template store.
+	 * 
+	 * @return the template store of this plug-in instance
+	 */
+	public TemplateStore getTemplateStore() {
+		if (templateStore == null) {
+			templateStore= new TemplateStore(getPreferenceStore(), CUSTOM_TEMPLATES_KEY);
+			try {
+				templateStore.load();
+			} catch (IOException e) {
+				logException("failed to load temaplates", e);
+			}
+		}
+		return templateStore;
+	}
+	
+	/**
+	 * Returns this plug-in's context type registry.
+	 * 
+	 * @return the context type registry for this plug-in instance
+	 */
+	public ContextTypeRegistry getContextTypeRegistry() {
+		if (ctxTypeRegistry == null) {
+			// create an configure the contexts available in the template editor
+			ctxTypeRegistry = new ContextTypeRegistry();
+			ctxTypeRegistry.addContextType(ConfluenceContextType.CONTEXT_TYPE);
+		}
+		return ctxTypeRegistry;
+	}
+	
 	public static void trace(String message) {
 		if (trace) {
 			System.out.println(message);
 		}
 	}
 
+	
 	public void logException(String message, Exception e) {
 		IStatus status = new Status(IStatus.ERROR, getDescriptor().getUniqueIdentifier(), 0, message, e); //$NON-NLS-1$
 		getLog().log(status);
@@ -169,12 +221,29 @@ public class TimTamPlugin extends AbstractUIPlugin {
 		super.startup();
 		ImageRegistry registry = getImageRegistry();
 		registry.put(IMG_SERVER, loadImage(IMG_SERVER));
-		registry.put(IMG_PAGE, loadImage((IMG_PAGE)));
-		registry.put(IMG_SPACE, loadImage((IMG_SPACE)));
-		registry.put(IMG_BROKEN_SPACE, loadImage((IMG_BROKEN_SPACE)));
-		registry.put(IMG_SPACEHOME, loadImage((IMG_SPACEHOME)));
-		registry.put(IMG_REFRESH, loadImage((IMG_REFRESH)));
+		registry.put(IMG_PAGE, loadImage(IMG_PAGE));
+		registry.put(IMG_SPACE, loadImage(IMG_SPACE));
+		registry.put(IMG_BROKEN_SPACE, loadImage(IMG_BROKEN_SPACE));
+		registry.put(IMG_SPACEHOME, loadImage(IMG_SPACEHOME));
+		registry.put(IMG_REFRESH, loadImage(IMG_REFRESH));
 
+		registry.put(IMG_BROWSER_FORWARD,loadImageDescriptor(IMG_BROWSER_FORWARD));
+		registry.put(IMG_BROWSER_BACK,loadImageDescriptor(IMG_BROWSER_BACK));
+		registry.put(IMG_BROWSER_STOP,loadImageDescriptor(IMG_BROWSER_STOP));
+		registry.put(IMG_BROWSER_REFRESH,loadImageDescriptor(IMG_BROWSER_REFRESH));
+
+		
+		
+		ImageDescriptor readOnlyOverlay = loadImageDescriptor(IMG_READONLY_DECORATOR);		
+		Point size = new Point(16,16);
+		DecoratorOverlayIcon temp = new DecoratorOverlayIcon(registry.get(IMG_PAGE),readOnlyOverlay,size);
+		registry.put(IMG_READONLY_PAGE,temp.createImage());
+		
+		temp = new DecoratorOverlayIcon(registry.get(IMG_SPACEHOME),readOnlyOverlay,size);
+		registry.put(IMG_READONLY_HOMEPAGE,temp.createImage());
+
+		temp = new DecoratorOverlayIcon(registry.get(IMG_SPACE),readOnlyOverlay,size);
+		registry.put(IMG_READONLY_SPACE,temp.createImage());
 	
 		ClassLoaders.setContextClassLoader(getClass().getClassLoader());
 
@@ -182,13 +251,30 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	}
 
 	
-	
 
 	public void shutdown() throws CoreException {
 		super.shutdown();
 		TimTamModel.getInstace().shutdown();
 	}
 
+	public Image getPageIcon(ConfluencePage page) {
+		ImageRegistry registry = getImageRegistry();
+		if(page.isHomePage()){
+			return page.readOnly()?registry.get(IMG_READONLY_HOMEPAGE):registry.get(IMG_SPACEHOME);
+		}else{
+			return page.readOnly()?registry.get(IMG_READONLY_PAGE):registry.get(IMG_PAGE);
+		}
+	}
+
+	public Image getSpaceIcon(ConfluenceSpace space) {
+		ImageRegistry registry = getImageRegistry();
+		if(!space.isLoaded()){
+			return registry.get(IMG_BROKEN_SPACE);
+		}
+		
+		return space.isReadOnly()?registry.get(IMG_READONLY_SPACE):registry.get(IMG_SPACE);
+	}
+		
 	public Image loadImage(String path) {
 		return loadImageDescriptor(path).createImage();
 	}
@@ -239,6 +325,13 @@ public class TimTamPlugin extends AbstractUIPlugin {
 	 */
 	public String getProxyPassword() {
 		return getPreferenceStore().getString(P_PROXY_PASSWORD);
+	}
+
+	/**
+	 * @return
+	 */
+	public Image getCompletionProcessorImage() {
+		return getImageRegistry().get(IMG_SPACE);
 	}
 
 }

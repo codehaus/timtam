@@ -47,31 +47,17 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ContributionManager;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.LocationAdapter;
-import org.eclipse.swt.browser.LocationEvent;
-import org.eclipse.swt.browser.ProgressAdapter;
-import org.eclipse.swt.browser.ProgressEvent;
-import org.eclipse.swt.browser.StatusTextEvent;
-import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
@@ -91,9 +77,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 
 	/** The text editor for the conf page */
 	protected ConflunceMarkupEditor editor;
-
-	/** The browser widget used for the preview */
-	Browser browser;
+	private BrowserControl browser;
 
 	//private RemotePage page;
 
@@ -125,7 +109,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 		Composite composite = new Composite(getContainer(), SWT.NONE);
 		FillLayout layout = new FillLayout();
 		composite.setLayout(layout);
-		createBrowser(composite, getEditorSite().getActionBars());
+		browser = new BrowserControl(composite, SWT.NONE,getEditorSite().getActionBars(),page);
 		previewPageIndex = addPage(composite);
 		setPageText(previewPageIndex, "&Preview");
 	}
@@ -144,6 +128,10 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 	 */
 	public void dispose() {
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+		// make sure the document is in synch with the page  
+		IDocumentProvider provider = editor.getDocumentProvider();
+		IDocument document = provider.getDocument(editor.getEditorInput());
+		document.set(page.getContent());
 		super.dispose();
 	}
 	/**
@@ -199,8 +187,7 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 				return;
 			}
 			
-			page.setContent(document.get());
-			browser.setText(page.renderContent());
+			browser.setText(page.renderContent(document.get()));
 			needsRendering = false;
 		}
 	}
@@ -224,117 +211,6 @@ public class TimTamPageEditor extends MultiPageEditorPart implements IResourceCh
 				}
 			});
 		}
-	}
-
-	private void createBrowser(Composite parent, final IActionBars actionBars) {
-
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 1;
-
-		parent.setLayout(gridLayout);
-
-//		CoolBarManager coolBarManager = new CoolBarManager(SWT.FLAT);
-//		
-//		//ToolBarManager manager = new ToolBarManager(SWT.FLAT);
-//		createBrowserToolBar(coolBarManager);
-//		
-//		Composite composite = new Composite(parent,SWT.FLAT);
-//		GridData gd = new GridData();
-//		gd.grabExcessHorizontalSpace = true;
-//		gd.verticalAlignment = GridData.CENTER;
-//		gd.horizontalAlignment = GridData.FILL;
-//		CoolBar coolBar = coolBarManager.createControl(parent);
-//		coolBar.setLayoutData(gd);
-//		coolBar.setBackground(new Color(Display.getCurrent(), new RGB(0,0,255)));
-		
-		browser = new Browser(parent, SWT.NONE);
-		GridData gd = new GridData();
-		gd.horizontalAlignment = GridData.FILL;
-		gd.verticalAlignment = GridData.FILL;
-		gd.grabExcessHorizontalSpace = true;
-		gd.grabExcessVerticalSpace = true;
-
-		browser.setLayoutData(gd);
-		browser.addProgressListener(new ProgressAdapter() {
-			IProgressMonitor monitor = actionBars.getStatusLineManager().getProgressMonitor();
-			boolean working = false;
-			int workedSoFar;
-			public void changed(ProgressEvent event) {
-				if (event.total == 0)
-					return;
-				if (!working) {
-					if (event.current == event.total)
-						return;
-					monitor.beginTask("", event.total); //$NON-NLS-1$
-					workedSoFar = 0;
-					working = true;
-				}
-				monitor.worked(event.current - workedSoFar);
-				workedSoFar = event.current;
-			}
-			public void completed(ProgressEvent event) {
-				monitor.done();
-				working = false;
-			}
-		});
-
-		browser.addStatusTextListener(new StatusTextListener() {
-			IStatusLineManager status = actionBars.getStatusLineManager();
-			public void changed(StatusTextEvent event) {
-				status.setMessage(event.text);
-			}
-		});
-
-		browser.addLocationListener(new LocationAdapter() {
-			public void changed(LocationEvent event) {
-
-			}
-		});
-		
-	
-	}
-
-	private void createBrowserToolBar(ContributionManager manager) {
-		ISharedImages images = getSite().getWorkbenchWindow().getWorkbench().getSharedImages();
-
-		Action back = new Action() {
-			public void run() {
-				browser.back();
-			}
-		};
-		back.setToolTipText("Back");
-		back.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_HOVER));
-		manager.add(back);
-
-
-		Action forward = new Action() {
-			public void run() {
-				browser.forward();
-			}
-		};
-		forward.setToolTipText("Forward");
-		forward.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_HOVER));
-		manager.add(forward);
-
-		
-		Action stop = new Action(){
-			public void run() {
-				browser.stop();
-			}
-		};
-		stop.setToolTipText("Stop");
-		stop.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_OBJS_ERROR_TSK));
-		manager.add(stop);
-		
-		Action refresh = new Action(){
-			public void run() {
-				browser.refresh();
-			}
-		};
-		refresh.setToolTipText("Refresh");
-		refresh.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_REDO));
-		manager.add(refresh);
-		manager.update(false);
 	}
 
 	public void documentAboutToBeChanged(DocumentEvent event) {

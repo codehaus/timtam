@@ -99,5 +99,17 @@
             id="TimTam.perspective">
       </perspective>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <contextType
+            name="Confluence Markup"
+            class="org.codehaus.timtam.template.ConfluenceContextType"
+            id="org.codehaus.timtam.conluence.markup">
+      </contextType>
+      <include
+            translations="templates/confluence-templates.properties"
+            file="templates/confluence-templates.xml">
+      </include>
+   </extension>
 
 </plugin>

@@ -72,7 +72,6 @@ public class NewServerConnectionWizard extends Wizard {
 	public void addPages() {
 		page = new ServerDetailsPage("Server Details");
 		addPage(page);
-		//addPage(new TestServerConnectionPage("Test Server Connection",page));
 	}
 
 	
@@ -83,7 +82,7 @@ public class NewServerConnectionWizard extends Wizard {
 	public boolean performFinish() {
 
 		IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				doFinish(page.server, page.user, page.password, monitor);
 				monitor.done();
 			}
@@ -93,8 +92,6 @@ public class NewServerConnectionWizard extends Wizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException e) {
-			Throwable realException = e.getTargetException();
-			MessageDialog.openError(getShell(), "Error", realException.getMessage());
 			return false;
 		}
 		return true;
@@ -107,13 +104,13 @@ public class NewServerConnectionWizard extends Wizard {
 	 * created file.
 	 */
 
-	protected void doFinish(String server, String user, String password, IProgressMonitor monitor) {
+	protected void doFinish(String server, String user, String password, IProgressMonitor monitor) throws InvocationTargetException {
 		monitor.setTaskName("Trying to connect to " + server + " ...");
 		monitor.worked(1);
 		try {
 			TimTamModel.getInstace().addServer(server, user, password);
 		} catch (LoginFailureException e) {
-			final String errorMessage = "Connection to " + server + " failed " + e.getMessage();
+			final String errorMessage = "Connection to " + server + " failed :\n" + e.getMessage();
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					MessageDialog.openError(getShell(), "Error Connecting to Server", errorMessage);
@@ -121,6 +118,7 @@ public class NewServerConnectionWizard extends Wizard {
 
 			});
 			TimTamPlugin.getInstance().logException("failed to add a connection to " + server, e);
+			throw new InvocationTargetException(e);
 		}
 	}
 

@@ -38,7 +38,11 @@
 */
 package org.codehaus.timtam.editors;
 
+import org.codehaus.timtam.template.ConfluenceCompletionProcessor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -79,5 +83,22 @@ public class ConfluenceSourceViewerConfiguration extends SourceViewerConfigurati
 		}
 		return macroScanner;
 	}
+	
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentAssistant(org.eclipse.jface.text.source.ISourceViewer)
+	 */
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		ContentAssistant assistant= new ContentAssistant();
+		assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+
+		IContentAssistProcessor processor= new ConfluenceCompletionProcessor();
+		assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+
+		assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_BELOW);
+		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+		assistant.enableAutoActivation(true);
+		
+		return assistant;	
+	}
 }

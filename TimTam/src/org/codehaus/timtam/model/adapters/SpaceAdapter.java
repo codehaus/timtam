@@ -38,12 +38,12 @@
  */
 package org.codehaus.timtam.model.adapters;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.codehaus.timtam.TimTamPlugin;
 import org.codehaus.timtam.model.ConfluenceService;
 import org.codehaus.timtam.model.ConfluenceSpace;
@@ -52,7 +52,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.graphics.Image;
-import com.atlassian.confluence.remote.RemotePage;
+
 import com.atlassian.confluence.remote.RemotePageSummary;
 import com.atlassian.confluence.remote.RemoteSpace;
 import com.atlassian.confluence.remote.RemoteSpaceSummary;
@@ -60,15 +60,17 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
  * @author zohar melamed
  *  
  */
-public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
-	private static Image spaceIcon;
-	private static Image brokenSpaceIcon;
+public class SpaceAdapter implements ConfluenceSpace,TreeAdapter  {
 	private RemoteSpaceSummary spaceSummary;
 	private RemoteSpace space;
 	private ServerAdapter parent;
+	private PageContainer container;
+	
 	private Map pages = new HashMap();
 	private ConfluenceService service;
 	private boolean loadedOk;
+	private boolean readOnly = true;
+	
 	/**
 	 * @param spaceSummary
 	 */
@@ -76,18 +78,22 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 		this.service = service;
 		this.parent = parent;
 		this.spaceSummary = spaceSummary;
-		if (spaceIcon == null) {
-			spaceIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_SPACE);
-		}
+		container = new PageContainer(service, this,null);
 		
-		if (brokenSpaceIcon == null) {
-			brokenSpaceIcon = TimTamPlugin.getInstance().getImageRegistry().get(TimTamPlugin.IMG_BROKEN_SPACE);
+
+		String[] permissions  = service.getPermissions(spaceSummary.key);
+		for (int i = 0; i < permissions.length; i++) {
+			String permission = permissions[i];
+			if(permission.equals("modify")){
+				readOnly = false;
+			}
 		}
-		
 	}
+	
 	public void refresh(IProgressMonitor monitor) {
 		
 		pages.clear();
+		container.clear();
 		loadedOk = false;
 		monitor.setTaskName("Loading Space " + spaceSummary.name);
 		space = service.getSpace(spaceSummary.key);
@@ -95,12 +101,8 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 		try {
 			buildPageMap(service.getPages(spaceSummary.key), monitor);
 			List rootPages = (List) pages.get(new Long(0));
-			children = new Object[rootPages.size()];
-			int i = 0;
 			for (Iterator iter = rootPages.iterator(); iter.hasNext();) {
-				RemotePageSummary summary = (RemotePageSummary) iter.next();
-				children[i] = new PageAdapter(summary, this, null, service);
-				++i;
+				container.addPage((RemotePageSummary) iter.next());
 			}
 			loadedOk = true;
 		} catch (Exception e) {
@@ -124,12 +126,14 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 			pageList.add(summary);
 		}
 	}
+	
 	List getChildren(long parentId) {
 		List childrenList = (List) pages.get(new Long(parentId));
 		return childrenList == null ? Collections.EMPTY_LIST : childrenList;
 	}
+	
 	public Image getImage() {
-		return loadedOk ? spaceIcon:brokenSpaceIcon;
+		return TimTamPlugin.getInstance().getSpaceIcon(this);
 	}
 	public Object getParent() {
 		return parent;
@@ -140,45 +144,38 @@ public class SpaceAdapter extends TreeAdapter implements ConfluenceSpace {
 	public long getHomepageId() {
 		return space.homePage;
 	}
+	
+	public String getSpaceKey(){
+		return space.key;
+	}
+	
 	public Integer getType() {
 		return SPACE;
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.codehaus.timtam.model.ConfluenceSpace#addPage(java.lang.String)
-	 */
-	public Object addPage(String name) {
-		RemotePage newPage = new RemotePage();
-		newPage.content = newPageContent();
-		newPage.space = space.key;
-		newPage.title = name;
-		newPage = service.storePage(newPage);
-		Object temp[] = new Object[children.length + 1];
-		System.arraycopy(children, 0, temp, 0, children.length);
-		PageAdapter adapter = new PageAdapter(newPage, this, null, service);
-		temp[children.length] = adapter;
-		children = temp;
-		return adapter;
+	
+	public Object createPage(String name) {
+		return container.createPage(name);
 	}
-	private String newPageContent() {
-		// TODO Auto-generated method stub
-		return "Created by [~" + service.getUser() + "]\\\\On " + Calendar.getInstance().getTime()
-				+ "\\\\Using {color:blue}TimTam{color}";
-	}
-	/**
-	 * @param adapter
-	 */
+	
+	
 	public void removePage(PageAdapter adapter) {
-		Object temp[] = new Object[children.length - 1];
-		int ti = 0;
-		for (int i = 0; i < children.length; i++) {
-			PageAdapter pageAdapter = (PageAdapter) children[i];
-			if (pageAdapter != adapter) {
-				temp[ti++] = pageAdapter;
-			}
-			children[i] = null;
-		}
-		children = temp;
+		container.removePage(adapter);
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+	
+	public boolean isLoaded() {
+		return loadedOk;
+	}
+
+
+	public Object[] getChildren() {
+		return container.getChildren();
+	}
+
+	public boolean hasChildren() {
+		return container.hasChildren();
 	}
 }

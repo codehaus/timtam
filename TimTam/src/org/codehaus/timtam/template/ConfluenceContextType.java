@@ -36,47 +36,17 @@
 *
 *
 */
-package org.codehaus.timtam.model;
+
+package org.codehaus.timtam.template;
+
+import org.eclipse.jface.text.templates.ContextType;
 
 /**
- * @author MelamedZ
- *
  */
-public interface ConfluencePage {
-	
-	public long getId();
-	public long getParentId();
-	public String getSpace();
-	public String getUrl();
-	
-	
-	public String getContent();
-	public String renderContent();
-	public String renderContent(String content);
-	public void setContent(String content);
-	
-	public String getTitle();
-	public void setTitle(String title);
-	
-	
-	public java.util.Date getCreated();
-	public String getCreator();
-	public boolean isHomePage();
-	public void setHomePage(boolean homePage);
-	public java.util.Date getModified();
-	public String getModifier();
-	public int getVersion();
-	
-	
-	public void save();
-	public void rename(String name);
-	public Object createChild(String name);
-	
-	public void refresh();
-	public void setDirty();
-	public boolean isDirty();
-	public void delete();
-	public boolean readOnly();
-
-	
+public class ConfluenceContextType extends ContextType{
+	public static final String CONTEXT_TYPE = "org.codehaus.timtam.conluence.markup";
+	/**
+	 */
+	public ConfluenceContextType() {
+	}
 }
