@@ -426,7 +426,7 @@ public class ConfluenceView extends ViewPart {
      */
     public void addChildPage() {
         TreeAdapter selectedNode = getSelectedNode();
-        if (selectedNode == null || !(selectedNode instanceof ConfluenceSpace)) {
+        if (selectedNode == null || !(selectedNode instanceof ConfluencePage)) {
             MessageDialog.openError(getSite().getShell(), "Add Chils Page",
                     "Please select a parent page");
             return;
