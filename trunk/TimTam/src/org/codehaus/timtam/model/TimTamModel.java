@@ -142,7 +142,7 @@ public class TimTamModel {
 			public void run() {
 				IRunnableWithProgress op = new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) {
-						adapter.refresh(monitor);
+						adapter.loadSpaces(monitor);
 					}
 				};
 				GUIUtil.runOperationWithProgress(op,null);
