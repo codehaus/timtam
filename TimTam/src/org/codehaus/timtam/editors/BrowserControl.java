@@ -186,12 +186,13 @@ public class BrowserControl extends Composite {
 		
 		Action refresh = new Action() {
 			public void run() {
-				browser.refresh();
+				//browser.refresh();
 			}
 		};
 		refresh.setToolTipText("Refresh");
 		refresh.setImageDescriptor(imageRegistry.getDescriptor(TimTamPlugin.IMG_BROWSER_REFRESH));
 		manager.add(refresh);
+		refresh.setEnabled(false);
 		manager.update(false);
 	}
 	/**
