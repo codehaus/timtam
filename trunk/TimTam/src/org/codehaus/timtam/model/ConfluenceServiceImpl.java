@@ -43,6 +43,7 @@ import org.codehaus.timtam.model.exceptions.LoginFailureException;
 
 import com.atlassian.confluence.remote.ConfluenceSoapHelper;
 import com.atlassian.confluence.remote.IConfluenceSoapService;
+import com.atlassian.confluence.remote.InvalidSessionException;
 import com.atlassian.confluence.remote.NotPermittedException;
 import com.atlassian.confluence.remote.RemoteAttachment;
 import com.atlassian.confluence.remote.RemoteBlogEntry;
@@ -57,6 +58,7 @@ import com.atlassian.confluence.remote.RemoteSpaceSummary;
 
 import electric.glue.context.ProxyContext;
 import electric.registry.Registry;
+import electric.util.classloader.ClassLoaders;
 import electric.xml.io.Mappings;
 
 /**
@@ -186,7 +188,11 @@ public class ConfluenceServiceImpl implements ConfluenceService {
     }
 
     public String renderContent(String spaceId, long pageId, String content)throws RemoteException {
-        return service.renderContent(getToken(), spaceId, pageId, content);
+        // ok this is crap of the worst kind but it fixes a glue related bug I can not resolve at present
+		try {
+			return  service.renderContent(getToken(), spaceId, pageId, content);
+		} catch (Exception e) {}
+		return service.renderContent(getToken(), spaceId, pageId, content);
     }
 
     public Boolean deletePage(long pageId) throws NotPermittedException,RemoteException {
